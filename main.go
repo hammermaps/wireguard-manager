@@ -276,6 +276,31 @@ func main() {
 	app.POST(util.BasePath+"/api/apply-wg-config", handler.ApplyServerConfig(db, tmplDir),
 		handler.ValidSession, handler.ContentTypeJson)
 
+	// API Key Management routes (admin only)
+	if !util.DisableLogin {
+		app.GET(util.BasePath+"/api-keys", handler.APIKeyManagementPage(db), handler.ValidSession, handler.RefreshSession, handler.NeedsAdmin)
+		app.GET(util.BasePath+"/api-statistics", handler.APIStatisticsPage(db), handler.ValidSession, handler.RefreshSession, handler.NeedsAdmin)
+		app.GET(util.BasePath+"/api/api-keys", handler.GetAPIKeys(db), handler.ValidSession, handler.NeedsAdmin)
+		app.POST(util.BasePath+"/api/api-keys", handler.CreateAPIKey(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
+		app.PUT(util.BasePath+"/api/api-keys", handler.UpdateAPIKey(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
+		app.DELETE(util.BasePath+"/api/api-keys", handler.DeleteAPIKey(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
+		app.GET(util.BasePath+"/api/api-statistics", handler.GetAPIStatistics(db), handler.ValidSession, handler.NeedsAdmin)
+	}
+
+	// Group management routes
+	app.POST(util.BasePath+"/api/group/set-status", handler.SetGroupStatus(db), handler.ValidSession, handler.ContentTypeJson)
+
+	// External API routes (require API key authentication)
+	apiGroup := app.Group(util.BasePath + "/api/v1")
+	apiGroup.Use(handler.ValidateAPIKey(db))
+	apiGroup.GET("/clients", handler.GetClients(db), handler.CheckAPIPermission(model.PermissionReadClients))
+	apiGroup.GET("/client/:id", handler.GetClient(db), handler.CheckAPIPermission(model.PermissionReadClients))
+	apiGroup.POST("/client", handler.NewClient(db), handler.ContentTypeJson, handler.CheckAPIPermission(model.PermissionWriteClients))
+	apiGroup.PUT("/client", handler.UpdateClient(db), handler.ContentTypeJson, handler.CheckAPIPermission(model.PermissionWriteClients))
+	apiGroup.POST("/client/set-status", handler.SetClientStatus(db), handler.ContentTypeJson, handler.CheckAPIPermission(model.PermissionWriteClients))
+	apiGroup.DELETE("/client/:id", handler.RemoveClient(db), handler.ContentTypeJson, handler.CheckAPIPermission(model.PermissionWriteClients))
+	apiGroup.POST("/group/set-status", handler.SetGroupStatus(db), handler.ContentTypeJson, handler.CheckAPIPermission(model.PermissionManageGroups))
+
 	// Serve static files from the embedded assets.
 	assetsDir, err := fs.Sub(embeddedAssets, "assets")
 	if err != nil {

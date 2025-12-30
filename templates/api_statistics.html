@@ -1,0 +1,262 @@
+{{define "title"}}
+API Statistics
+{{end}}
+
+{{define "top_css"}}
+<style>
+    .stat-card {
+        background-color: #2d2d2d;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+    .stat-number {
+        font-size: 2em;
+        font-weight: bold;
+        color: #4e73df;
+    }
+</style>
+{{end}}
+
+{{define "username"}}
+{{ .username }}
+{{end}}
+
+{{define "page_title"}}
+API Statistics
+{{end}}
+
+{{define "page_content"}}
+<section class="content">
+    <div class="container-fluid">
+        <!-- Statistics Cards -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h5>Total API Keys</h5>
+                    <div class="stat-number" id="stat_total_keys">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h5>Active API Keys</h5>
+                    <div class="stat-number" id="stat_active_keys">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h5>Total API Calls</h5>
+                    <div class="stat-number" id="stat_total_calls">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h5>Calls Today</h5>
+                    <div class="stat-number" id="stat_calls_today">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Access Logs Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent API Access Logs</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-sm btn-primary" onclick="loadStatistics()">
+                                <i class="fas fa-sync"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table id="logs-table" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>API Key</th>
+                                    <th>Method</th>
+                                    <th>Endpoint</th>
+                                    <th>IP Address</th>
+                                    <th>User Agent</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-list">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Key Usage Chart -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">API Usage by Key</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="usage-chart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{{end}}
+
+{{define "bottom_js"}}
+<script>
+    let statsData = null;
+    let usageChart = null;
+
+    function loadStatistics() {
+        $.ajax({
+            url: '{{.basePath}}/api/api-statistics',
+            type: 'GET',
+            success: function(data) {
+                statsData = data;
+                renderStatistics();
+            },
+            error: function() {
+                toastr.error('Failed to load API statistics');
+            }
+        });
+    }
+
+    function renderStatistics() {
+        if (!statsData) return;
+
+        // Update stat cards
+        const totalKeys = statsData.api_keys ? statsData.api_keys.length : 0;
+        const activeKeys = statsData.api_keys ? statsData.api_keys.filter(k => k.enabled).length : 0;
+        const totalCalls = statsData.log_count || 0;
+
+        $('#stat_total_keys').text(totalKeys);
+        $('#stat_active_keys').text(activeKeys);
+        $('#stat_total_calls').text(totalCalls);
+
+        // Calculate calls today
+        const today = new Date().toDateString();
+        const callsToday = statsData.logs ? statsData.logs.filter(log => 
+            new Date(log.timestamp).toDateString() === today
+        ).length : 0;
+        $('#stat_calls_today').text(callsToday);
+
+        // Render logs table
+        renderLogsTable();
+
+        // Render usage chart
+        renderUsageChart();
+    }
+
+    function renderLogsTable() {
+        const tbody = $('#logs-list');
+        tbody.empty();
+
+        if (!statsData.logs || statsData.logs.length === 0) {
+            tbody.append('<tr><td colspan="7" class="text-center">No API access logs found</td></tr>');
+            return;
+        }
+
+        // Show only the 100 most recent logs in the table
+        const recentLogs = statsData.logs.slice(0, 100);
+
+        recentLogs.forEach(function(log) {
+            const statusBadge = log.status_code >= 200 && log.status_code < 300
+                ? `<span class="badge badge-success">${log.status_code}</span>`
+                : log.status_code >= 400
+                ? `<span class="badge badge-danger">${log.status_code}</span>`
+                : `<span class="badge badge-warning">${log.status_code}</span>`;
+
+            const row = `
+                <tr>
+                    <td>${new Date(log.timestamp).toLocaleString()}</td>
+                    <td>${escapeHtml(log.api_key_name)}</td>
+                    <td><span class="badge badge-secondary">${escapeHtml(log.method)}</span></td>
+                    <td><code>${escapeHtml(log.endpoint)}</code></td>
+                    <td>${escapeHtml(log.ip_address)}</td>
+                    <td>${escapeHtml(log.user_agent.substring(0, 50))}...</td>
+                    <td>${statusBadge}</td>
+                </tr>
+            `;
+            tbody.append(row);
+        });
+    }
+
+    function renderUsageChart() {
+        // Count API calls by key
+        const usageByKey = {};
+        if (statsData.logs) {
+            statsData.logs.forEach(function(log) {
+                const keyName = log.api_key_name || 'Unknown';
+                usageByKey[keyName] = (usageByKey[keyName] || 0) + 1;
+            });
+        }
+
+        const labels = Object.keys(usageByKey);
+        const data = Object.values(usageByKey);
+
+        // Destroy existing chart if it exists
+        if (usageChart) {
+            usageChart.destroy();
+        }
+
+        // Create new chart
+        const ctx = document.getElementById('usage-chart').getContext('2d');
+        usageChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'API Calls',
+                    data: data,
+                    backgroundColor: '#4e73df',
+                    borderColor: '#2e59d9',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    $(document).ready(function() {
+        loadStatistics();
+        // Refresh every 30 seconds
+        setInterval(loadStatistics, 30000);
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+{{end}}
+
+{{template "base.html" .}}

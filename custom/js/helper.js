@@ -22,10 +22,20 @@ function renderClientList(data) {
     // Render grouped clients
     const groupNames = Object.keys(groupedClients).sort();
     groupNames.forEach(function(groupName) {
-      // Add a header for each group
+      // Add a header for each group with control buttons
       const groupHeader = `
         <div class="col-12">
-          <h5 class="mt-4 mb-2"><i class="fas fa-folder-open"></i> ${escapeHtml(groupName)}</h5>
+          <h5 class="mt-4 mb-2">
+            <i class="fas fa-folder-open"></i> ${escapeHtml(groupName)}
+            <div class="btn-group float-right">
+              <button class="btn btn-sm btn-success" onclick="setGroupStatus('${escapeHtml(groupName)}', true)" title="Enable all clients in this group">
+                <i class="fas fa-play"></i> Enable All
+              </button>
+              <button class="btn btn-sm btn-danger" onclick="setGroupStatus('${escapeHtml(groupName)}', false)" title="Disable all clients in this group">
+                <i class="fas fa-pause"></i> Disable All
+              </button>
+            </div>
+          </h5>
         </div>
       `;
       $('#client-list').append(groupHeader);

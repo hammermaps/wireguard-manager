@@ -1,0 +1,414 @@
+{{define "title"}}
+API Key Management
+{{end}}
+
+{{define "top_css"}}
+<style>
+    .api-key-display {
+        background-color: #2d2d2d;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: monospace;
+        word-break: break-all;
+        margin: 10px 0;
+    }
+    .permission-badge {
+        margin: 2px;
+    }
+</style>
+{{end}}
+
+{{define "username"}}
+{{ .username }}
+{{end}}
+
+{{define "page_title"}}
+API Key Management
+{{end}}
+
+{{define "page_content"}}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Manage API Keys</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modal_new_api_key">
+                                <i class="fas fa-plus"></i> New API Key
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table id="api-keys-table" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Key Prefix</th>
+                                    <th>Permissions</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Last Used</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="api-keys-list">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal: New API Key -->
+<div class="modal fade" id="modal_new_api_key">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Create New API Key</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="frm_new_api_key">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="api_key_name">Name</label>
+                        <input type="text" class="form-control" id="api_key_name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Permissions</label>
+                        <div>
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="perm_read_clients" name="permissions" value="read:clients">
+                                <label for="perm_read_clients">Read Clients</label>
+                            </div>
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="perm_write_clients" name="permissions" value="write:clients">
+                                <label for="perm_write_clients">Write Clients</label>
+                            </div>
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="perm_read_server" name="permissions" value="read:server">
+                                <label for="perm_read_server">Read Server</label>
+                            </div>
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="perm_write_server" name="permissions" value="write:server">
+                                <label for="perm_write_server">Write Server</label>
+                            </div>
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="perm_manage_groups" name="permissions" value="manage:groups">
+                                <label for="perm_manage_groups">Manage Groups</label>
+                            </div>
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="perm_read_stats" name="permissions" value="read:stats">
+                                <label for="perm_read_stats">Read Statistics</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Show API Key -->
+<div class="modal fade" id="modal_show_api_key">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">API Key Created</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Important:</strong> This is the only time you will see this API key. Please save it securely.
+                </div>
+                <div class="form-group">
+                    <label>API Key:</label>
+                    <div class="api-key-display" id="new_api_key_value"></div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="copyAPIKey()">
+                        <i class="fas fa-copy"></i> Copy to Clipboard
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Edit API Key -->
+<div class="modal fade" id="modal_edit_api_key">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Edit API Key</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="frm_edit_api_key">
+                <input type="hidden" id="edit_api_key_id" name="id">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit_api_key_name">Name</label>
+                        <input type="text" class="form-control" id="edit_api_key_name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <div class="icheck-primary">
+                            <input type="checkbox" id="edit_enabled">
+                            <label for="edit_enabled">Enabled</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Permissions</label>
+                        <div id="edit_permissions">
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="edit_perm_read_clients" name="permissions" value="read:clients">
+                                <label for="edit_perm_read_clients">Read Clients</label>
+                            </div>
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="edit_perm_write_clients" name="permissions" value="write:clients">
+                                <label for="edit_perm_write_clients">Write Clients</label>
+                            </div>
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="edit_perm_read_server" name="permissions" value="read:server">
+                                <label for="edit_perm_read_server">Read Server</label>
+                            </div>
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="edit_perm_write_server" name="permissions" value="write:server">
+                                <label for="edit_perm_write_server">Write Server</label>
+                            </div>
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="edit_perm_manage_groups" name="permissions" value="manage:groups">
+                                <label for="edit_perm_manage_groups">Manage Groups</label>
+                            </div>
+                            <div class="icheck-primary">
+                                <input type="checkbox" id="edit_perm_read_stats" name="permissions" value="read:stats">
+                                <label for="edit_perm_read_stats">Read Statistics</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{end}}
+
+{{define "bottom_js"}}
+<script>
+    let apiKeysData = [];
+
+    function loadAPIKeys() {
+        $.ajax({
+            url: '{{.basePath}}/api/api-keys',
+            type: 'GET',
+            success: function(data) {
+                apiKeysData = data;
+                renderAPIKeys();
+            },
+            error: function() {
+                toastr.error('Failed to load API keys');
+            }
+        });
+    }
+
+    function renderAPIKeys() {
+        const tbody = $('#api-keys-list');
+        tbody.empty();
+
+        if (apiKeysData.length === 0) {
+            tbody.append('<tr><td colspan="7" class="text-center">No API keys found</td></tr>');
+            return;
+        }
+
+        apiKeysData.forEach(function(key) {
+            const permissions = key.permissions.map(p => 
+                `<span class="badge badge-info permission-badge">${p}</span>`
+            ).join('');
+            
+            const status = key.enabled 
+                ? '<span class="badge badge-success">Enabled</span>' 
+                : '<span class="badge badge-danger">Disabled</span>';
+            
+            const lastUsed = key.last_used_at 
+                ? new Date(key.last_used_at).toLocaleString() 
+                : 'Never';
+            
+            const row = `
+                <tr>
+                    <td>${escapeHtml(key.name)}</td>
+                    <td><code>${escapeHtml(key.key_prefix)}...</code></td>
+                    <td>${permissions}</td>
+                    <td>${status}</td>
+                    <td>${new Date(key.created_at).toLocaleString()}</td>
+                    <td>${lastUsed}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="editAPIKey('${key.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteAPIKey('${key.id}', '${escapeHtml(key.name)}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tbody.append(row);
+        });
+    }
+
+    $('#frm_new_api_key').submit(function(e) {
+        e.preventDefault();
+        
+        const permissions = [];
+        $('input[name="permissions"]:checked').each(function() {
+            permissions.push($(this).val());
+        });
+
+        const data = {
+            name: $('#api_key_name').val(),
+            permissions: permissions
+        };
+
+        $.ajax({
+            url: '{{.basePath}}/api/api-keys',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(response) {
+                if (response.success) {
+                    $('#modal_new_api_key').modal('hide');
+                    $('#frm_new_api_key')[0].reset();
+                    $('#new_api_key_value').text(response.raw_key);
+                    $('#modal_show_api_key').modal('show');
+                    loadAPIKeys();
+                    toastr.success(response.message);
+                } else {
+                    toastr.error(response.message);
+                }
+            },
+            error: function() {
+                toastr.error('Failed to create API key');
+            }
+        });
+    });
+
+    function copyAPIKey() {
+        const key = $('#new_api_key_value').text();
+        navigator.clipboard.writeText(key).then(function() {
+            toastr.success('API key copied to clipboard');
+        }, function() {
+            toastr.error('Failed to copy API key');
+        });
+    }
+
+    function editAPIKey(id) {
+        const key = apiKeysData.find(k => k.id === id);
+        if (!key) return;
+
+        $('#edit_api_key_id').val(key.id);
+        $('#edit_api_key_name').val(key.name);
+        $('#edit_enabled').prop('checked', key.enabled);
+
+        $('#edit_permissions input[type="checkbox"]').prop('checked', false);
+        key.permissions.forEach(function(perm) {
+            $('#edit_permissions input[value="' + perm + '"]').prop('checked', true);
+        });
+
+        $('#modal_edit_api_key').modal('show');
+    }
+
+    $('#frm_edit_api_key').submit(function(e) {
+        e.preventDefault();
+        
+        const permissions = [];
+        $('#edit_permissions input[name="permissions"]:checked').each(function() {
+            permissions.push($(this).val());
+        });
+
+        const data = {
+            id: $('#edit_api_key_id').val(),
+            name: $('#edit_api_key_name').val(),
+            enabled: $('#edit_enabled').is(':checked'),
+            permissions: permissions
+        };
+
+        $.ajax({
+            url: '{{.basePath}}/api/api-keys',
+            type: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(response) {
+                if (response.success) {
+                    $('#modal_edit_api_key').modal('hide');
+                    loadAPIKeys();
+                    toastr.success(response.message);
+                } else {
+                    toastr.error(response.message);
+                }
+            },
+            error: function() {
+                toastr.error('Failed to update API key');
+            }
+        });
+    });
+
+    function deleteAPIKey(id, name) {
+        if (!confirm(`Are you sure you want to delete API key "${name}"?`)) {
+            return;
+        }
+
+        $.ajax({
+            url: '{{.basePath}}/api/api-keys',
+            type: 'DELETE',
+            contentType: 'application/json',
+            data: JSON.stringify({ id: id }),
+            success: function(response) {
+                if (response.success) {
+                    loadAPIKeys();
+                    toastr.success(response.message);
+                } else {
+                    toastr.error(response.message);
+                }
+            },
+            error: function() {
+                toastr.error('Failed to delete API key');
+            }
+        });
+    }
+
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    $(document).ready(function() {
+        loadAPIKeys();
+    });
+</script>
+{{end}}
+
+{{template "base.html" .}}

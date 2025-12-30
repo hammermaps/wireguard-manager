@@ -38,6 +38,8 @@ func (o *JsonDB) Init() error {
 	var clientPath = path.Join(o.dbPath, "clients")
 	var serverPath = path.Join(o.dbPath, "server")
 	var userPath = path.Join(o.dbPath, "users")
+	var apiKeyPath = path.Join(o.dbPath, "apikeys")
+	var apiLogPath = path.Join(o.dbPath, "apilogs")
 	var serverInterfacePath = path.Join(serverPath, "interfaces.json")
 	var serverKeyPairPath = path.Join(serverPath, "keypair.json")
 	var globalSettingPath = path.Join(serverPath, "global_settings.json")
@@ -52,6 +54,12 @@ func (o *JsonDB) Init() error {
 	}
 	if _, err := os.Stat(userPath); os.IsNotExist(err) {
 		os.MkdirAll(userPath, os.ModePerm)
+	}
+	if _, err := os.Stat(apiKeyPath); os.IsNotExist(err) {
+		os.MkdirAll(apiKeyPath, os.ModePerm)
+	}
+	if _, err := os.Stat(apiLogPath); os.IsNotExist(err) {
+		os.MkdirAll(apiLogPath, os.ModePerm)
 	}
 
 	// server's interface
@@ -377,4 +385,151 @@ func (o *JsonDB) SaveHashes(hashes model.ClientServerHashes) error {
 		return err
 	}
 	return output
+}
+
+// GetAPIKeys returns all API keys from the database
+func (o *JsonDB) GetAPIKeys() ([]model.APIKey, error) {
+	var keys []model.APIKey
+	apiKeyPath := path.Join(o.dbPath, "apikeys")
+	
+	// create directory if it doesn't exist
+	if _, err := os.Stat(apiKeyPath); os.IsNotExist(err) {
+		os.MkdirAll(apiKeyPath, os.ModePerm)
+		return keys, nil
+	}
+	
+	results, err := o.conn.ReadAll("apikeys")
+	if err != nil {
+		return keys, err
+	}
+	
+	for _, i := range results {
+		key := model.APIKey{}
+		if err := json.Unmarshal(i, &key); err != nil {
+			return keys, fmt.Errorf("cannot decode API key json structure: %v", err)
+		}
+		keys = append(keys, key)
+	}
+	return keys, nil
+}
+
+// GetAPIKeyByID returns a specific API key by ID
+func (o *JsonDB) GetAPIKeyByID(keyID string) (model.APIKey, error) {
+	key := model.APIKey{}
+	if err := o.conn.Read("apikeys", keyID, &key); err != nil {
+		return key, err
+	}
+	return key, nil
+}
+
+// GetAPIKeyByKey returns a specific API key by the key value
+func (o *JsonDB) GetAPIKeyByKey(keyValue string) (model.APIKey, error) {
+	keys, err := o.GetAPIKeys()
+	if err != nil {
+		return model.APIKey{}, err
+	}
+	
+	for _, key := range keys {
+		if key.Key == keyValue {
+			return key, nil
+		}
+	}
+	return model.APIKey{}, fmt.Errorf("API key not found")
+}
+
+// SaveAPIKey saves an API key to the database
+func (o *JsonDB) SaveAPIKey(key model.APIKey) error {
+	apiKeyPath := path.Join(path.Join(o.dbPath, "apikeys"), key.ID+".json")
+	output := o.conn.Write("apikeys", key.ID, key)
+	err := util.ManagePerms(apiKeyPath)
+	if err != nil {
+		return err
+	}
+	return output
+}
+
+// DeleteAPIKey deletes an API key from the database
+func (o *JsonDB) DeleteAPIKey(keyID string) error {
+	return o.conn.Delete("apikeys", keyID)
+}
+
+// SaveAPIAccessLog saves an API access log entry to the database
+func (o *JsonDB) SaveAPIAccessLog(log model.APIAccessLog) error {
+	apiLogPath := path.Join(o.dbPath, "apilogs")
+	
+	// create directory if it doesn't exist
+	if _, err := os.Stat(apiLogPath); os.IsNotExist(err) {
+		os.MkdirAll(apiLogPath, os.ModePerm)
+	}
+	
+	logPath := path.Join(apiLogPath, log.ID+".json")
+	output := o.conn.Write("apilogs", log.ID, log)
+	err := util.ManagePerms(logPath)
+	if err != nil {
+		return err
+	}
+	return output
+}
+
+// GetAPIAccessLogs returns the most recent API access logs
+func (o *JsonDB) GetAPIAccessLogs(limit int) ([]model.APIAccessLog, error) {
+	var logs []model.APIAccessLog
+	apiLogPath := path.Join(o.dbPath, "apilogs")
+	
+	// create directory if it doesn't exist
+	if _, err := os.Stat(apiLogPath); os.IsNotExist(err) {
+		os.MkdirAll(apiLogPath, os.ModePerm)
+		return logs, nil
+	}
+	
+	results, err := o.conn.ReadAll("apilogs")
+	if err != nil {
+		return logs, err
+	}
+	
+	for _, i := range results {
+		log := model.APIAccessLog{}
+		if err := json.Unmarshal(i, &log); err != nil {
+			continue
+		}
+		logs = append(logs, log)
+	}
+	
+	// Sort by timestamp descending
+	for i := 0; i < len(logs)-1; i++ {
+		for j := i + 1; j < len(logs); j++ {
+			if logs[i].Timestamp.Before(logs[j].Timestamp) {
+				logs[i], logs[j] = logs[j], logs[i]
+			}
+		}
+	}
+	
+	// Apply limit
+	if limit > 0 && len(logs) > limit {
+		logs = logs[:limit]
+	}
+	
+	return logs, nil
+}
+
+// GetAPIAccessLogsByKeyID returns API access logs for a specific API key
+func (o *JsonDB) GetAPIAccessLogsByKeyID(keyID string, limit int) ([]model.APIAccessLog, error) {
+	allLogs, err := o.GetAPIAccessLogs(0)
+	if err != nil {
+		return nil, err
+	}
+	
+	var filteredLogs []model.APIAccessLog
+	for _, log := range allLogs {
+		if log.APIKeyID == keyID {
+			filteredLogs = append(filteredLogs, log)
+		}
+	}
+	
+	// Apply limit
+	if limit > 0 && len(filteredLogs) > limit {
+		filteredLogs = filteredLogs[:limit]
+	}
+	
+	return filteredLogs, nil
 }
