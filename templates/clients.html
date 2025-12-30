@@ -101,6 +101,10 @@ VPN WireGuard Clients
                         <input type="text" class="form-control" id="_client_email" name="client_email">
                     </div>
                     <div class="form-group">
+                        <label for="_client_group" class="control-label">Group</label>
+                        <input type="text" class="form-control" id="_client_group" name="client_group" placeholder="Optional group name">
+                    </div>
+                    <div class="form-group">
                         <label for="_subnet_ranges" class="control-label">Subnet range</label>
                         <select id="_subnet_ranges" class="select2"
                             data-placeholder="Select a subnet range" style="width: 100%;">
@@ -560,6 +564,7 @@ VPN WireGuard Clients
                         modal.find("#_client_id").val(client.id);
                         modal.find("#_client_name").val(client.name);
                         modal.find("#_client_email").val(client.email);
+                        modal.find("#_client_group").val(client.group);
 
                         let preselectedEl
                         if (client.subnet_ranges && client.subnet_ranges.length > 0) {
@@ -664,6 +669,7 @@ VPN WireGuard Clients
             const client_id = $("#_client_id").val();
             const name = $("#_client_name").val();
             const email = $("#_client_email").val();
+            const group = $("#_client_group").val();
             const allocated_ips = $("#_client_allocated_ips").val().split(",");
             const allowed_ips = $("#_client_allowed_ips").val().split(",");
             let use_server_dns = false;
@@ -687,7 +693,7 @@ VPN WireGuard Clients
                 enabled = true;
             }
 
-            const data = {"id": client_id, "name": name, "email": email, "allocated_ips": allocated_ips,
+            const data = {"id": client_id, "name": name, "email": email, "group": group, "allocated_ips": allocated_ips,
                 "allowed_ips": allowed_ips, "extra_allowed_ips": extra_allowed_ips, "endpoint": endpoint,
                 "use_server_dns": use_server_dns, "enabled": enabled, "public_key": public_key, "preshared_key": preshared_key};
 

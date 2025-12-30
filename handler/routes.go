@@ -671,6 +671,7 @@ func UpdateClient(db store.IStore) echo.HandlerFunc {
 		// Map new data.
 		client.Name = clientUpdate.Name
 		client.Email = clientUpdate.Email
+		client.Group = clientUpdate.Group
 		client.Enabled = clientUpdate.Enabled
 		client.UseServerDNS = clientUpdate.UseServerDNS
 		client.AllocatedIPs = clientUpdate.AllocatedIPs
