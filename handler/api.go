@@ -359,6 +359,8 @@ func ValidateAPIKey(db store.IStore) echo.MiddlewareFunc {
 			db.SaveAPIKey(keyData)
 
 			// Log the API access
+			// Note: StatusCode is set to 0 here as the response hasn't been sent yet.
+			// In a production system, you would use a response wrapper to capture the actual status code.
 			logEntry := model.APIAccessLog{
 				ID:         xid.New().String(),
 				APIKeyID:   keyData.ID,
@@ -367,7 +369,7 @@ func ValidateAPIKey(db store.IStore) echo.MiddlewareFunc {
 				Method:     c.Request().Method,
 				IPAddress:  util.GetClientIPFromRequest(c.Request().RemoteAddr, c.Request().Header.Get("X-Forwarded-For"), c.Request().Header.Get("X-Real-IP")),
 				UserAgent:  c.Request().UserAgent(),
-				StatusCode: 0, // Will be updated after request
+				StatusCode: 0, // Will be 0 until a response wrapper is implemented
 				Timestamp:  now,
 			}
 			db.SaveAPIAccessLog(logEntry)

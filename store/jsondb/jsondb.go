@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"sort"
 	"time"
 
 	"github.com/sdomino/scribble"
@@ -495,14 +496,10 @@ func (o *JsonDB) GetAPIAccessLogs(limit int) ([]model.APIAccessLog, error) {
 		logs = append(logs, log)
 	}
 	
-	// Sort by timestamp descending
-	for i := 0; i < len(logs)-1; i++ {
-		for j := i + 1; j < len(logs); j++ {
-			if logs[i].Timestamp.Before(logs[j].Timestamp) {
-				logs[i], logs[j] = logs[j], logs[i]
-			}
-		}
-	}
+	// Sort by timestamp descending using efficient sort
+	sort.Slice(logs, func(i, j int) bool {
+		return logs[i].Timestamp.After(logs[j].Timestamp)
+	})
 	
 	// Apply limit
 	if limit > 0 && len(logs) > limit {
@@ -514,22 +511,40 @@ func (o *JsonDB) GetAPIAccessLogs(limit int) ([]model.APIAccessLog, error) {
 
 // GetAPIAccessLogsByKeyID returns API access logs for a specific API key
 func (o *JsonDB) GetAPIAccessLogsByKeyID(keyID string, limit int) ([]model.APIAccessLog, error) {
-	allLogs, err := o.GetAPIAccessLogs(0)
-	if err != nil {
-		return nil, err
+	var logs []model.APIAccessLog
+	apiLogPath := path.Join(o.dbPath, "apilogs")
+	
+	// create directory if it doesn't exist
+	if _, err := os.Stat(apiLogPath); os.IsNotExist(err) {
+		os.MkdirAll(apiLogPath, os.ModePerm)
+		return logs, nil
 	}
 	
-	var filteredLogs []model.APIAccessLog
-	for _, log := range allLogs {
+	results, err := o.conn.ReadAll("apilogs")
+	if err != nil {
+		return logs, err
+	}
+	
+	// Filter and collect logs in one pass
+	for _, i := range results {
+		log := model.APIAccessLog{}
+		if err := json.Unmarshal(i, &log); err != nil {
+			continue
+		}
 		if log.APIKeyID == keyID {
-			filteredLogs = append(filteredLogs, log)
+			logs = append(logs, log)
 		}
 	}
 	
+	// Sort by timestamp descending
+	sort.Slice(logs, func(i, j int) bool {
+		return logs[i].Timestamp.After(logs[j].Timestamp)
+	})
+	
 	// Apply limit
-	if limit > 0 && len(filteredLogs) > limit {
-		filteredLogs = filteredLogs[:limit]
+	if limit > 0 && len(logs) > limit {
+		logs = logs[:limit]
 	}
 	
-	return filteredLogs, nil
+	return logs, nil
 }
