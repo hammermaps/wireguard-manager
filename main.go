@@ -18,6 +18,7 @@ import (
 	"github.com/labstack/gommon/log"
 	"github.com/swissmakers/wireguard-manager/emailer"
 	"github.com/swissmakers/wireguard-manager/handler"
+	"github.com/swissmakers/wireguard-manager/model"
 	"github.com/swissmakers/wireguard-manager/router"
 	"github.com/swissmakers/wireguard-manager/store"
 	"github.com/swissmakers/wireguard-manager/store/jsondb"
