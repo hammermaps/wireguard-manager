@@ -25,6 +25,9 @@ type Client struct {
 	// Email is the email address associated with the client.
 	Email string `json:"email"`
 
+	// Group is the group name to organize clients into logical groupings.
+	Group string `json:"group"`
+
 	// SubnetRanges holds the names of subnet ranges from which the client’s IPs were allocated.
 	// This field is omitted from JSON output if empty.
 	SubnetRanges []string `json:"subnet_ranges,omitempty"`
