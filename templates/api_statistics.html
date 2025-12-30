@@ -178,7 +178,7 @@ API Statistics
                     <td><span class="badge badge-secondary">${escapeHtml(log.method)}</span></td>
                     <td><code>${escapeHtml(log.endpoint)}</code></td>
                     <td>${escapeHtml(log.ip_address)}</td>
-                    <td>${escapeHtml(log.user_agent.substring(0, 50))}...</td>
+                    <td>${escapeHtml((log.user_agent || '').substring(0, 50))}${(log.user_agent && log.user_agent.length > 50) ? '...' : ''}</td>
                     <td>${statusBadge}</td>
                 </tr>
             `;

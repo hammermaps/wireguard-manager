@@ -17,6 +17,12 @@ import (
 	"github.com/swissmakers/wireguard-manager/util"
 )
 
+// Constants for API operations
+const (
+	// MaxAPILogsToRetrieve is the maximum number of API access logs to retrieve
+	MaxAPILogsToRetrieve = 1000
+)
+
 // Request/Response structures for API key management
 type createAPIKeyRequest struct {
 	Name        string   `json:"name"`
@@ -285,8 +291,8 @@ func APIStatisticsPage(db store.IStore) echo.HandlerFunc {
 // GetAPIStatistics returns API usage statistics
 func GetAPIStatistics(db store.IStore) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// Get recent access logs (last 1000)
-		logs, err := db.GetAPIAccessLogs(1000)
+		// Get recent access logs (limited by MaxAPILogsToRetrieve constant)
+		logs, err := db.GetAPIAccessLogs(MaxAPILogsToRetrieve)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{
 				Success: false,
