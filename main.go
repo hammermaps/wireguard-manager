@@ -22,6 +22,7 @@ import (
 	"github.com/swissmakers/wireguard-manager/router"
 	"github.com/swissmakers/wireguard-manager/store"
 	"github.com/swissmakers/wireguard-manager/store/jsondb"
+	"github.com/swissmakers/wireguard-manager/store/mysqldb"
 	"github.com/swissmakers/wireguard-manager/util"
 )
 
@@ -54,6 +55,9 @@ var (
 	flagWgConfTemplate     string
 	flagBasePath           string
 	flagSubnetRanges       string
+	flagDatabaseType       = "json"
+	flagDatabaseDSN        string
+	flagDatabasePath       = "./db"
 )
 
 const (
@@ -88,6 +92,10 @@ func init() {
 	flag.StringVar(&flagBasePath, "base-path", util.LookupEnvOrString("BASE_PATH", flagBasePath), "The base path of the URL")
 	flag.StringVar(&flagSubnetRanges, "subnet-ranges", util.LookupEnvOrString("SUBNET_RANGES", flagSubnetRanges), "IP ranges to choose from when assigning an IP for a client.")
 	flag.IntVar(&flagSessionMaxDuration, "session-max-duration", util.LookupEnvOrInt("SESSION_MAX_DURATION", flagSessionMaxDuration), "Max time in days a remembered session is refreshed and valid.")
+	flag.StringVar(&flagDatabaseType, "database-type", util.LookupEnvOrString(util.DatabaseTypeEnvVar, flagDatabaseType), "Database type: json or mysql")
+	flag.StringVar(&flagDatabaseDSN, "database-dsn", util.LookupEnvOrString(util.DatabaseDSNEnvVar, flagDatabaseDSN), "Database DSN for MySQL (e.g., user:password@tcp(host:port)/dbname)")
+	flag.StringVar(&flagDatabasePath, "database-path", util.LookupEnvOrString(util.DatabasePathEnvVar, flagDatabasePath), "Database path for JSON DB")
+
 
 	// Handle SMTP password, Sendgrid API key and session secret.
 	var (
@@ -160,15 +168,33 @@ func init() {
 		fmt.Println("Custom wg.conf\t:", util.WgConfTemplate)
 		fmt.Println("Base path\t:", util.BasePath+"/")
 		fmt.Println("Subnet ranges\t:", util.GetSubnetRangesString())
+		fmt.Println("Database type\t:", flagDatabaseType)
 	}
 }
 
 func main() {
-	// Initialize the JSON DB store.
-	db, err := jsondb.New("./db")
-	if err != nil {
-		log.Fatalf("Error initializing database: %v", err)
+	// Initialize the database store based on the configured type.
+	var db store.IStore
+	var err error
+
+	switch strings.ToLower(flagDatabaseType) {
+	case "mysql":
+		if flagDatabaseDSN == "" {
+			log.Fatalf("MySQL database DSN is required when using MySQL database type. Set WGM_DATABASE_DSN environment variable.")
+		}
+		db, err = mysqldb.New(flagDatabaseDSN)
+		if err != nil {
+			log.Fatalf("Error initializing MySQL database: %v", err)
+		}
+	case "json":
+		db, err = jsondb.New(flagDatabasePath)
+		if err != nil {
+			log.Fatalf("Error initializing JSON database: %v", err)
+		}
+	default:
+		log.Fatalf("Unsupported database type: %s. Supported types: json, mysql", flagDatabaseType)
 	}
+
 	if err := db.Init(); err != nil {
 		log.Fatalf("Error initializing database: %v", err)
 	}
