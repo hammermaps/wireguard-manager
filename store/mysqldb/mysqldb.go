@@ -5,9 +5,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/labstack/gommon/log"
 	"github.com/skip2/go-qrcode"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 
@@ -288,13 +291,21 @@ func (o *MySQLDB) initializeDefaultData() error {
 			Admin:    util.DefaultIsAdmin,
 		}
 
+		var plaintext string
+		var isGeneratedPassword bool
+
 		user.PasswordHash = util.LookupEnvOrString(util.PasswordHashEnvVar, "")
 		if user.PasswordHash == "" {
 			user.PasswordHash = util.LookupEnvOrFile(util.PasswordHashFileEnvVar, "")
 			if user.PasswordHash == "" {
-				plaintext := util.LookupEnvOrString(util.PasswordEnvVar, util.DefaultPassword)
-				if plaintext == util.DefaultPassword {
-					plaintext = util.LookupEnvOrFile(util.PasswordFileEnvVar, util.DefaultPassword)
+				plaintext = util.LookupEnvOrString(util.PasswordEnvVar, "")
+				if plaintext == "" {
+					plaintext = util.LookupEnvOrFile(util.PasswordFileEnvVar, "")
+					if plaintext == "" {
+						// Generate random 8-character password
+						plaintext = util.GenerateRandomPassword(8)
+						isGeneratedPassword = true
+					}
 				}
 				hash, err := util.HashPassword(plaintext)
 				if err != nil {
@@ -313,6 +324,32 @@ func (o *MySQLDB) initializeDefaultData() error {
 		}
 
 		util.DBUsersToCRC32[user.Username] = util.GetDBUserCRC32(user)
+
+		// Log and save generated password if it was generated
+		if isGeneratedPassword {
+			log.Infof("=== INITIAL ADMIN PASSWORD CREATED ===")
+			log.Infof("Username: %s", user.Username)
+			log.Infof("Password: %s", plaintext)
+
+			// Write password to log file
+			logFilePath := path.Join("./db", "initial_admin_password.log")
+			logContent := fmt.Sprintf("=== INITIAL ADMIN PASSWORD CREATED ===\n")
+			logContent += fmt.Sprintf("Username: %s\n", user.Username)
+			logContent += fmt.Sprintf("Password: %s\n", plaintext)
+			logContent += fmt.Sprintf("Created at: %s\n", time.Now().Format(time.RFC3339))
+			logContent += fmt.Sprintf("This password has been saved to: %s\n", logFilePath)
+			logContent += "Please change this password after your first login!\n"
+			logContent += "==========================================\n"
+
+			if err := os.WriteFile(logFilePath, []byte(logContent), 0600); err != nil {
+				log.Warnf("Failed to write password to log file: %v", err)
+			} else {
+				log.Infof("This password has been saved to: %s", logFilePath)
+			}
+
+			log.Infof("Please change this password after your first login!")
+			log.Infof("==========================================")
+		}
 	} else {
 		// Load existing users into cache
 		users, err := o.GetUsers()

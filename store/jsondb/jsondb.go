@@ -9,6 +9,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/labstack/gommon/log"
 	"github.com/sdomino/scribble"
 	"github.com/skip2/go-qrcode"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
@@ -141,13 +142,22 @@ func (o *JsonDB) Init() error {
 		user := new(model.User)
 		user.Username = util.LookupEnvOrString(util.UsernameEnvVar, util.DefaultUsername)
 		user.Admin = util.DefaultIsAdmin
+		
+		var plaintext string
+		var isGeneratedPassword bool
+		
 		user.PasswordHash = util.LookupEnvOrString(util.PasswordHashEnvVar, "")
 		if user.PasswordHash == "" {
 			user.PasswordHash = util.LookupEnvOrFile(util.PasswordHashFileEnvVar, "")
 			if user.PasswordHash == "" {
-				plaintext := util.LookupEnvOrString(util.PasswordEnvVar, util.DefaultPassword)
-				if plaintext == util.DefaultPassword {
-					plaintext = util.LookupEnvOrFile(util.PasswordFileEnvVar, util.DefaultPassword)
+				plaintext = util.LookupEnvOrString(util.PasswordEnvVar, "")
+				if plaintext == "" {
+					plaintext = util.LookupEnvOrFile(util.PasswordFileEnvVar, "")
+					if plaintext == "" {
+						// Generate random 8-character password
+						plaintext = util.GenerateRandomPassword(8)
+						isGeneratedPassword = true
+					}
 				}
 				hash, err := util.HashPassword(plaintext)
 				if err != nil {
@@ -162,6 +172,32 @@ func (o *JsonDB) Init() error {
 		err = util.ManagePerms(path.Join(path.Join(o.dbPath, "users"), user.Username+".json"))
 		if err != nil {
 			return err
+		}
+		
+		// Log and save generated password if it was generated
+		if isGeneratedPassword {
+			log.Infof("=== INITIAL ADMIN PASSWORD CREATED ===")
+			log.Infof("Username: %s", user.Username)
+			log.Infof("Password: %s", plaintext)
+			
+			// Write password to log file
+			logFilePath := path.Join(o.dbPath, "initial_admin_password.log")
+			logContent := fmt.Sprintf("=== INITIAL ADMIN PASSWORD CREATED ===\n")
+			logContent += fmt.Sprintf("Username: %s\n", user.Username)
+			logContent += fmt.Sprintf("Password: %s\n", plaintext)
+			logContent += fmt.Sprintf("Created at: %s\n", time.Now().Format(time.RFC3339))
+			logContent += fmt.Sprintf("This password has been saved to: %s\n", logFilePath)
+			logContent += "Please change this password after your first login!\n"
+			logContent += "==========================================\n"
+			
+			if err := os.WriteFile(logFilePath, []byte(logContent), 0600); err != nil {
+				log.Warnf("Failed to write password to log file: %v", err)
+			} else {
+				log.Infof("This password has been saved to: %s", logFilePath)
+			}
+			
+			log.Infof("Please change this password after your first login!")
+			log.Infof("==========================================")
 		}
 	}
 
