@@ -51,7 +51,8 @@ var (
 	flagEmailFromName  = "WireGuard Manager"
 	// IMPORTANT: Instead of generating a new random secret on each run,
 	// we now persist the secret in our JSON DB if no SESSION_SECRET is provided.
-	flagSessionSecret      = util.GetPersistedSessionSecret()
+	// The database path is determined from environment variables to ensure consistency.
+	flagSessionSecret      = util.GetPersistedSessionSecret(util.LookupEnvOrString(util.DatabasePathEnvVar, "./db"))
 	flagSessionMaxDuration = 90
 	flagWgConfTemplate     string
 	flagBasePath           string
