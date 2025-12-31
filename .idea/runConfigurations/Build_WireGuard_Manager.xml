@@ -2,7 +2,7 @@
   <configuration default="false" name="Build WireGuard Manager" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="wireguard-manager" />
     <working_directory value="$PROJECT_DIR$" />
-    <go_parameters value="-ldflags=&quot;-X 'main.appVersion=dev' -X 'main.gitCommit=local' -X 'main.gitRef=refs/heads/local' -X 'main.buildTime=$(date)'&quot;" />
+    <go_parameters value="-ldflags=&quot;-X 'main.appVersion=dev' -X 'main.gitCommit=local' -X 'main.gitRef=refs/heads/local' -X 'main.buildTime=development-build'&quot;" />
     <kind value="PACKAGE" />
     <package value="github.com/swissmakers/wireguard-manager" />
     <directory value="$PROJECT_DIR$" />

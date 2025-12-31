@@ -3,8 +3,8 @@ pipeline {
     
     environment {
         GO_VERSION = '1.23'
-        APP_VERSION = "${env.GIT_BRANCH == 'origin/master' ? 'stable' : env.GIT_BRANCH}"
-        BUILD_TIME = sh(script: 'date', returnStdout: true).trim()
+        APP_VERSION = "${env.GIT_BRANCH == 'master' ? 'stable' : env.GIT_BRANCH}"
+        BUILD_TIME = sh(script: 'date -u "+%Y-%m-%d %H:%M:%S UTC"', returnStdout: true).trim()
         GIT_COMMIT = "${env.GIT_COMMIT}"
         GIT_REF = "${env.GIT_BRANCH}"
     }
@@ -48,6 +48,14 @@ pipeline {
                 sh '''
                     chmod +x ./prepare_assets.sh
                     ./prepare_assets.sh
+                '''
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                sh '''
+                    go test -v ./...
                 '''
             }
         }
@@ -118,14 +126,6 @@ pipeline {
                         }
                     }
                 }
-            }
-        }
-        
-        stage('Test') {
-            steps {
-                sh '''
-                    go test -v ./...
-                '''
             }
         }
     }
