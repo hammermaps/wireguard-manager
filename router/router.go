@@ -148,7 +148,11 @@ func New(tmplDir fs.FS, extraData map[string]interface{}, secret [64]byte) *echo
 				var current interface{} = trans
 				for _, k := range keys {
 					if m, ok := current.(map[string]interface{}); ok {
-						current = m[k]
+						if val, exists := m[k]; exists {
+							current = val
+						} else {
+							return key
+						}
 					} else {
 						return key
 					}

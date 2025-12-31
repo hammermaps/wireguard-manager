@@ -56,12 +56,17 @@ func T(lang, keyPath string) string {
 	t := GetTranslation(lang)
 	keys := strings.Split(keyPath, ".")
 
-	var current interface{} = t
+	var current interface{} = map[string]interface{}(t)
 	for _, key := range keys {
 		if m, ok := current.(map[string]interface{}); ok {
-			current = m[key]
+			if val, exists := m[key]; exists {
+				current = val
+			} else {
+				// Key not found, return the key path as fallback
+				return keyPath
+			}
 		} else {
-			// Key not found, return the key path as fallback
+			// Not a map, return the key path as fallback
 			return keyPath
 		}
 	}
