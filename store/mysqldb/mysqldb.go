@@ -136,7 +136,6 @@ func (o *MySQLDB) createTables() error {
 		`CREATE TABLE IF NOT EXISTS api_keys (
 			id VARCHAR(255) PRIMARY KEY,
 			name VARCHAR(255) NOT NULL,
-			key_hash TEXT NOT NULL,
 			key_value TEXT NOT NULL,
 			permissions JSON NOT NULL,
 			enabled BOOLEAN NOT NULL DEFAULT TRUE,
@@ -552,12 +551,20 @@ func (o *MySQLDB) GetClients(hasQRCode bool) ([]model.ClientData, error) {
 		}
 
 		if subnetRangesJSON != nil {
-			json.Unmarshal(subnetRangesJSON, &client.SubnetRanges)
+			if err := json.Unmarshal(subnetRangesJSON, &client.SubnetRanges); err != nil {
+				return clients, fmt.Errorf("failed to unmarshal subnet ranges: %v", err)
+			}
 		}
-		json.Unmarshal(allocatedIPsJSON, &client.AllocatedIPs)
-		json.Unmarshal(allowedIPsJSON, &client.AllowedIPs)
+		if err := json.Unmarshal(allocatedIPsJSON, &client.AllocatedIPs); err != nil {
+			return clients, fmt.Errorf("failed to unmarshal allocated IPs: %v", err)
+		}
+		if err := json.Unmarshal(allowedIPsJSON, &client.AllowedIPs); err != nil {
+			return clients, fmt.Errorf("failed to unmarshal allowed IPs: %v", err)
+		}
 		if extraAllowedIPsJSON != nil {
-			json.Unmarshal(extraAllowedIPsJSON, &client.ExtraAllowedIPs)
+			if err := json.Unmarshal(extraAllowedIPsJSON, &client.ExtraAllowedIPs); err != nil {
+				return clients, fmt.Errorf("failed to unmarshal extra allowed IPs: %v", err)
+			}
 		}
 
 		clientData := model.ClientData{Client: &client}
@@ -623,12 +630,20 @@ func (o *MySQLDB) GetClientByID(clientID string, qrCodeSettings model.QRCodeSett
 	}
 
 	if subnetRangesJSON != nil {
-		json.Unmarshal(subnetRangesJSON, &client.SubnetRanges)
+		if err := json.Unmarshal(subnetRangesJSON, &client.SubnetRanges); err != nil {
+			return clientData, fmt.Errorf("failed to unmarshal subnet ranges: %v", err)
+		}
 	}
-	json.Unmarshal(allocatedIPsJSON, &client.AllocatedIPs)
-	json.Unmarshal(allowedIPsJSON, &client.AllowedIPs)
+	if err := json.Unmarshal(allocatedIPsJSON, &client.AllocatedIPs); err != nil {
+		return clientData, fmt.Errorf("failed to unmarshal allocated IPs: %v", err)
+	}
+	if err := json.Unmarshal(allowedIPsJSON, &client.AllowedIPs); err != nil {
+		return clientData, fmt.Errorf("failed to unmarshal allowed IPs: %v", err)
+	}
 	if extraAllowedIPsJSON != nil {
-		json.Unmarshal(extraAllowedIPsJSON, &client.ExtraAllowedIPs)
+		if err := json.Unmarshal(extraAllowedIPsJSON, &client.ExtraAllowedIPs); err != nil {
+			return clientData, fmt.Errorf("failed to unmarshal extra allowed IPs: %v", err)
+		}
 	}
 
 	clientData.Client = &client
