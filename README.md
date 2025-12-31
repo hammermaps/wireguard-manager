@@ -25,18 +25,21 @@ WireGuard Manager is an open-source web application written in Go that simplifie
 1. [Installation Example on CentOS/RHEL 9 (Manual Setup)](#installation-example-on-centosrhel-9-manual-setup)
    - [Prerequisites](#prerequisites)
    - [Steps](#steps)
-2. [Environment Variables](#environment-variables)
+2. [Database Configuration](#database-configuration)
+   - [JSON Database (Default)](#json-database-default)
+   - [MySQL Database](#mysql-database)
+3. [Environment Variables](#environment-variables)
    - [Defaults for Server Configuration](#defaults-for-server-configuration)
    - [Defaults for New Clients](#defaults-for-new-clients)
    - [Docker-Only Variables](#docker-only-variables)
-3. [Auto-Restarting WireGuard](#auto-restarting-wireguard)
+4. [Auto-Restarting WireGuard](#auto-restarting-wireguard)
    - [Using systemd](#using-systemd)
    - [Using OpenRC](#using-openrc)
    - [Using Docker](#using-docker)
-4. [Build From Source](#build-from-source)
+5. [Build From Source](#build-from-source)
    - [Build Docker Image](#build-docker-image)
    - [Build Binary File](#build-binary-file)
-5. [License](#license)
+6. [License](#license)
 
 ---
 
@@ -206,6 +209,62 @@ Below is a step-by-step guide demonstrating how to set up `wireguard-manager` **
 
 ---
 
+## Database Configuration
+
+WireGuard Manager supports two database backends: JSON (default) and MySQL. The database backend is selected via the `WGM_DATABASE_TYPE` environment variable.
+
+### JSON Database (Default)
+
+The JSON database stores all data in JSON files on the filesystem. This is the simplest option and requires no additional setup.
+
+- **Storage Location**: Set via `WGM_DATABASE_PATH` (default: `./db`)
+- **Configuration**: No additional configuration needed
+- **Use Case**: Ideal for small to medium deployments, simple setups, or when you prefer file-based storage
+
+**Example environment configuration:**
+```bash
+WGM_DATABASE_TYPE=json
+WGM_DATABASE_PATH=/opt/wireguard-manager/db
+```
+
+### MySQL Database
+
+The MySQL database backend provides a more scalable solution for larger deployments with better concurrency and backup options.
+
+- **Requirements**: MySQL 5.7+ or MariaDB 10.2+
+- **Configuration**: Set `WGM_DATABASE_DSN` with your MySQL connection string
+- **Use Case**: Recommended for production environments, multi-instance deployments, or when you need advanced database features
+
+**Example environment configuration:**
+```bash
+WGM_DATABASE_TYPE=mysql
+WGM_DATABASE_DSN=wguser:wgpassword@tcp(mysql-host:3306)/wireguard_manager?parseTime=true
+```
+
+**Setting up MySQL:**
+
+1. **Create a database and user:**
+   ```sql
+   CREATE DATABASE wireguard_manager CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   CREATE USER 'wguser'@'%' IDENTIFIED BY 'your_secure_password';
+   GRANT ALL PRIVILEGES ON wireguard_manager.* TO 'wguser'@'%';
+   FLUSH PRIVILEGES;
+   ```
+
+2. **Update your environment configuration:**
+   ```bash
+   WGM_DATABASE_TYPE=mysql
+   WGM_DATABASE_DSN=wguser:your_secure_password@tcp(localhost:3306)/wireguard_manager?parseTime=true
+   ```
+
+3. **The tables will be created automatically** on the first run of wireguard-manager.
+
+**Docker Compose Example with MySQL:**
+
+See [examples/docker-compose-mysql.yaml](examples/docker-compose-mysql.yaml) for a complete example of running WireGuard Manager with MySQL in Docker.
+
+---
+
 ## Environment Variables
 
 Below is a table of commonly used environment variables for configuring wireguard-manager. These can be set in your environment file (e.g., `/opt/wireguard_environment.conf`) or as Docker environment variables.
@@ -234,6 +293,9 @@ Below is a table of commonly used environment variables for configuring wireguar
 | **WGM_CONFIG_FILE_PATH** | Default location for the `wg0.conf` file.                                                                                                                                                                                                  | `/etc/wireguard/wg0.conf`          |
 | **WGM_LOG_LEVEL**        | Log level. One of `DEBUG`, `INFO`, `WARN`, `ERROR`, `OFF`.                                                                                                                                                                                | `INFO`                              |
 | **WG_CONF_TEMPLATE**     | Custom `wg.conf` template file. See the [default template](https://github.com/swissmakers/wireguard-manager/blob/master/templates/wg.conf).                                                                                                 | *(none)*                            |
+| **WGM_DATABASE_TYPE**    | Database backend to use. Options: `json` or `mysql`.                                                                                                                                                                                      | `json`                              |
+| **WGM_DATABASE_DSN**     | MySQL Data Source Name (DSN) when using MySQL. Format: `username:password@tcp(host:port)/database?parseTime=true`. Required when `WGM_DATABASE_TYPE=mysql`.                                                                              | *(none)*                            |
+| **WGM_DATABASE_PATH**    | Path to the JSON database directory when using JSON database.                                                                                                                                                                             | `./db`                              |
 | **EMAIL_FROM_ADDRESS**   | Sender email address when sending client configs.                                                                                                                                                                                          | *(none)*                            |
 | **EMAIL_FROM_NAME**      | Sender name for emails.                                                                                                                                                                                                                   | `WireGuard Manager`                 |
 | **SENDGRID_API_KEY**     | SendGrid API key for sending emails.                                                                                                                                                                                                       | *(none)*                            |

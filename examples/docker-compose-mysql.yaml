@@ -1,0 +1,80 @@
+version: "3"
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: wgm-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wireguard_manager
+      MYSQL_USER: wguser
+      MYSQL_PASSWORD: wgpassword
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - wgm-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # WireGuard Manager
+  wg:
+    build: ..
+    # image: swissmakers/wireguard-manager:latest
+    container_name: wgm
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    network_mode: host
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Database Configuration
+      - WGM_DATABASE_TYPE=mysql
+      - WGM_DATABASE_DSN=wguser:wgpassword@tcp(localhost:3306)/wireguard_manager?parseTime=true
+      
+      # Authentication
+      - WGM_USERNAME=admin
+      - WGM_PASSWORD=change-this-password
+      
+      # Email Configuration (optional)
+      - EMAIL_FROM_ADDRESS=noreply@example.com
+      - EMAIL_FROM_NAME=WireGuard Manager
+      - SMTP_HOSTNAME=smtp.example.com
+      - SMTP_PORT=587
+      - SMTP_USERNAME=noreply@example.com
+      - SMTP_PASSWORD=smtp_password
+      - SMTP_AUTH_TYPE=LOGIN
+      - SMTP_ENCRYPTION=STARTTLS
+      
+      # Session Configuration
+      - SESSION_SECRET=change-this-to-a-random-secret
+      
+      # WireGuard Configuration
+      - WGM_ENDPOINT_ADDRESS=vpn.example.com
+      - WGM_DNS=8.8.8.8,1.1.1.1
+      - WGM_MTU=1450
+      - WGM_PERSISTENT_KEEPALIVE=15
+      - WGM_CONFIG_FILE_PATH=/etc/wireguard/wg0.conf
+      
+      # Docker-specific
+      - WGM_MANAGE_START=false
+      - WGM_MANAGE_RESTART=false
+    volumes:
+      - /etc/wireguard:/etc/wireguard
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+
+volumes:
+  mysql-data:
+
+networks:
+  wgm-network:
+    driver: bridge
