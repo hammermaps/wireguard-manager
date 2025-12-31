@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Prepare Assets" type="ShConfigurationType">
+    <option name="SCRIPT_TEXT" value="#!/usr/bin/env bash&#10;set -e&#10;&#10;DIR=$(dirname &quot;$0&quot;)&#10;&#10;# Install node modules&#10;echo &quot;Installing node modules...&quot;&#10;npm install --production&#10;&#10;# Copy admin-lte dist&#10;echo &quot;Copying admin-lte assets...&quot;&#10;mkdir -p &quot;${DIR}/assets/dist/js&quot; &quot;${DIR}/assets/dist/css&quot; &amp;&amp; \&#10;  cp -r &quot;${DIR}/node_modules/admin-lte/dist/js/adminlte.min.js&quot; &quot;${DIR}/assets/dist/js/adminlte.min.js&quot; &amp;&amp; \&#10;  cp -r &quot;${DIR}/node_modules/admin-lte/dist/css/adminlte.min.css&quot; &quot;${DIR}/assets/dist/css/adminlte.min.css&quot;&#10;&#10;# Copy helper js&#10;echo &quot;Copying custom assets...&quot;&#10;cp -r &quot;${DIR}/custom&quot; &quot;${DIR}/assets&quot;&#10;&#10;# Copy plugins&#10;echo &quot;Copying plugins...&quot;&#10;mkdir -p &quot;${DIR}/assets/plugins&quot; &amp;&amp; \&#10;  cp -r &quot;${DIR}/node_modules/admin-lte/plugins/jquery&quot; \&#10;  &quot;${DIR}/node_modules/admin-lte/plugins/fontawesome-free&quot; \&#10;  &quot;${DIR}/node_modules/admin-lte/plugins/bootstrap&quot; \&#10;  &quot;${DIR}/node_modules/admin-lte/plugins/icheck-bootstrap&quot; \&#10;  &quot;${DIR}/node_modules/admin-lte/plugins/toastr&quot; \&#10;  &quot;${DIR}/node_modules/admin-lte/plugins/jquery-validation&quot; \&#10;  &quot;${DIR}/node_modules/admin-lte/plugins/select2&quot; \&#10;  &quot;${DIR}/node_modules/jquery-tags-input&quot; \&#10;  &quot;${DIR}/assets/plugins/&quot;&#10;&#10;echo &quot;Assets prepared successfully!&quot;" />
+    <option name="INDEPENDENT_SCRIPT_PATH" value="false" />
+    <option name="SCRIPT_PATH" value="" />
+    <option name="SCRIPT_OPTIONS" value="" />
+    <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+    <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+    <option name="INTERPRETER_PATH" value="/bin/bash" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="EXECUTE_IN_TERMINAL" value="true" />
+    <option name="EXECUTE_SCRIPT_FILE" value="false" />
+    <envs />
+    <method v="2" />
+  </configuration>
+</component>

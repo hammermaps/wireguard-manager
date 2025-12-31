@@ -1,0 +1,19 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Debug WireGuard Manager" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="wireguard-manager" />
+    <working_directory value="$PROJECT_DIR$" />
+    <envs>
+      <env name="WGUI_ENDPOINT_ADDRESS" value="127.0.0.1" />
+      <env name="WGUI_DNS" value="1.1.1.1" />
+      <env name="WGUI_SERVER_INTERFACE_ADDRESSES" value="10.252.1.0/24" />
+      <env name="WGUI_SERVER_LISTEN_PORT" value="51820" />
+    </envs>
+    <kind value="PACKAGE" />
+    <package value="github.com/swissmakers/wireguard-manager" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/main.go" />
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Prepare Assets" run_configuration_type="ShConfigurationType" />
+    </method>
+  </configuration>
+</component>

@@ -20,7 +20,12 @@ node_modules/
 
 # IDEs
 .vscode
-.idea
+.idea/*
+!.idea/modules.xml
+!.idea/vcs.xml
+!.idea/misc.xml
+!.idea/*.iml
+!.idea/runConfigurations/
 
 # Vim
 .*.sw[op]
