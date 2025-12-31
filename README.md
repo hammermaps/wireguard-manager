@@ -11,6 +11,7 @@ WireGuard Manager is an open-source web application written in Go that simplifie
 - Send client configuration files via email using either SMTP or SendGrid.
 - Secure Session Management: Sessions are managed using Gorilla Sessions with a persisted session secret stored in the JSON DB, ensuring that session cookies remain valid across restarts.
 - Configuration Change Detection: Polls for configuration changes and prompts the admin to apply new configurations via an “Apply Config” button.
+- **Multilingual Support**: Interface available in multiple languages (English and German currently supported). See [MULTILINGUAL.md](MULTILINGUAL.md) for details.
 - A dark mode user interface with responsive design for an improved user experience.
 
 

@@ -1,6 +1,6 @@
 {{define "base.html"}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{.lang}}">
 
 <head>
     <meta charset="utf-8">
@@ -144,7 +144,7 @@
             <!-- SEARCH FORM -->
             <form class="form-inline ml-3" style="display: none" id="search-form">
                 <div class="input-group input-group-sm">
-                    <input class="form-control form-control-navbar" placeholder="Search"
+                    <input class="form-control form-control-navbar" placeholder="{{tr .t "nav.search_placeholder"}}"
                         aria-label="Search" id="search-input">
                     <div class="input-group-append">
                         <button class="btn-navbar" type="submit" disabled>
@@ -155,11 +155,11 @@
                 <div class="form-group form-group-sm">
                     <select name="status-selector" id="status-selector" class="custom-select form-control-navbar" style="margin-left: 0.5em; height: 90%; font-size: 14px;">
                         <!-- THIS SECTION IS OVERRIDDEN BY JS. SEE updateSearchList() function in clients.html BEFORE EDITING -->
-                        <option value="All">All</option>
-                        <option value="Enabled">Enabled</option>
-                        <option value="Disabled">Disabled</option>
-                        <option value="Connected">Connected</option>
-                        <option value="Disconnected">Disconnected</option>
+                        <option value="All">{{tr .t "status.all"}}</option>
+                        <option value="Enabled">{{tr .t "status.enabled"}}</option>
+                        <option value="Disabled">{{tr .t "status.disabled"}}</option>
+                        <option value="Connected">{{tr .t "status.connected"}}</option>
+                        <option value="Disconnected">{{tr .t "status.disconnected"}}</option>
                         <!-- THIS SECTION IS OVERRIDDEN BY JS. SEE updateSearchList() function in clients.html BEFORE EDITING -->
                     </select>
                 </div>
@@ -167,13 +167,23 @@
 
             <!-- Right navbar links -->
             <div class="navbar-nav ml-auto">
+                <!-- Language Switcher -->
+                <div class="nav-item dropdown" style="margin-right: 0.5em;">
+                    <a class="nav-link dropdown-toggle" href="#" id="langDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-globe"></i> {{if eq .lang "de"}}DE{{else}}EN{{end}}
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="langDropdown">
+                        <a class="dropdown-item" href="{{.basePath}}/set-language?lang=en">English</a>
+                        <a class="dropdown-item" href="{{.basePath}}/set-language?lang=de">Deutsch</a>
+                    </div>
+                </div>
                 <button style="margin-left: 0.5em;" type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal"
-                    data-target="#modal_new_client"><i class="nav-icon fas fa-plus"></i> New Client</button>
+                    data-target="#modal_new_client"><i class="nav-icon fas fa-plus"></i> {{tr .t "nav.new_client"}}</button>
                 <button id="apply-config-button" style="margin-left: 0.5em; display: none;" type="button" class="btn btn-outline-danger btn-sm" data-toggle="modal"
-                    data-target="#modal_apply_config"><i class="nav-icon fas fa-check"></i> Apply Config</button>
+                    data-target="#modal_apply_config"><i class="nav-icon fas fa-check"></i> {{tr .t "nav.apply_config"}}</button>
                 {{if .baseData.CurrentUser}}
                 <button onclick="location.href='{{.basePath}}/logout';" style="margin-left: 0.5em;" type="button"
-                    class="btn btn-outline-danger btn-sm"><i class="nav-icon fas fa-sign-out-alt"></i> Logout</button>
+                    class="btn btn-outline-danger btn-sm"><i class="nav-icon fas fa-sign-out-alt"></i> {{tr .t "nav.logout"}}</button>
                 {{end}}
             </div>
         </nav>
@@ -183,7 +193,7 @@
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
             <a href="{{.basePath}}" class="brand-link">
-                <span class="brand-text">&nbsp; WIREGUARD MANAGER</span>
+                <span class="brand-text">&nbsp; {{tr .t "brand_title"}}</span>
             </a>
 
             <!-- Sidebar -->
@@ -195,9 +205,9 @@
                     </div>
                     <div class="info">
                         {{if .baseData.CurrentUser}}
-                        <a href="{{.basePath}}/profile" class="d-block">My Account: {{.baseData.CurrentUser}}</a>
+                        <a href="{{.basePath}}/profile" class="d-block">{{tr .t "nav.my_account"}}: {{.baseData.CurrentUser}}</a>
                         {{else}}
-                        <a href="#" class="d-block">My Account</a>
+                        <a href="#" class="d-block">{{tr .t "nav.my_account"}}</a>
                         {{end}}
                     </div>
                 </div>
@@ -205,52 +215,52 @@
                 <!-- Sidebar Menu -->
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                        <li class="nav-header">MAIN</li>
+                        <li class="nav-header">{{tr .t "nav.main"}}</li>
                         <li class="nav-item">
                             <a href="{{.basePath}}/" class="nav-link {{if eq .baseData.Active ""}}active{{end}}">
                                 <i class="nav-icon fas fa-user-secret"></i>
-                                <p>VPN Clients</p>
+                                <p>{{tr .t "nav.vpn_clients"}}</p>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="{{.basePath}}/status" class="nav-link {{if eq .baseData.Active "status" }}active{{end}}">
                                 <i class="nav-icon fas fa-signal"></i>
-                                <p>VPN Connected</p>
+                                <p>{{tr .t "nav.vpn_connected"}}</p>
                             </a>
                         </li>
                         {{if .baseData.Admin}}
-                        <li class="nav-header">SETTINGS</li>
+                        <li class="nav-header">{{tr .t "nav.settings"}}</li>
                         <li class="nav-item">
                             <a href="{{.basePath}}/wg-server" class="nav-link {{if eq .baseData.Active "wg-server" }}active{{end}}">
                                 <i class="nav-icon fas fa-server"></i>
-                                <p>WireGuard Server</p>
+                                <p>{{tr .t "nav.wg_server"}}</p>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="{{.basePath}}/global-settings" class="nav-link {{if eq .baseData.Active "global-settings" }}active{{end}}">
                                 <i class="nav-icon fas fa-cog"></i>
-                                <p>Client Config Settings</p>
+                                <p>{{tr .t "nav.client_config_settings"}}</p>
                             </a>
                         </li>
                         {{if not .loginDisabled}}
                         <li class="nav-item">
                             <a href="{{.basePath}}/users-settings" class="nav-link {{if eq .baseData.Active "users-settings" }}active{{end}}">
                                 <i class="nav-icon fas fa-cog"></i>
-                                <p>WGM User Accounts</p>
+                                <p>{{tr .t "nav.wgm_user_accounts"}}</p>
                             </a>
                         </li>
                         {{end}}
-                        <li class="nav-header">API</li>
+                        <li class="nav-header">{{tr .t "nav.api"}}</li>
                         <li class="nav-item">
                             <a href="{{.basePath}}/api-keys" class="nav-link {{if eq .baseData.Active "api-keys" }}active{{end}}">
                                 <i class="nav-icon fas fa-key"></i>
-                                <p>API Key Management</p>
+                                <p>{{tr .t "nav.api_key_management"}}</p>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="{{.basePath}}/api-statistics" class="nav-link {{if eq .baseData.Active "api-statistics" }}active{{end}}">
                                 <i class="nav-icon fas fa-chart-bar"></i>
-                                <p>API Statistics</p>
+                                <p>{{tr .t "nav.api_statistics"}}</p>
                             </a>
                         </li>
                         {{end}}
@@ -265,7 +275,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">New WireGuard Client</h4>
+                        <h4 class="modal-title">{{tr .t "modal.new_client_title"}}</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -274,75 +284,75 @@
                         <div class="modal-body">
                             <!-- Form fields for new client go here -->
                             <div class="form-group">
-                                <label for="client_name" class="control-label">Name</label>
+                                <label for="client_name" class="control-label">{{tr .t "form.name"}}</label>
                                 <input type="text" class="form-control" id="client_name" name="client_name">
                             </div>
                             <div class="form-group">
-                                <label for="client_email" class="control-label">Email</label>
+                                <label for="client_email" class="control-label">{{tr .t "form.email"}}</label>
                                 <input type="text" class="form-control" id="client_email" name="client_email">
                             </div>
                             <div class="form-group">
-                                <label for="client_group" class="control-label">Group</label>
-                                <input type="text" class="form-control" id="client_group" name="client_group" placeholder="Optional group name">
+                                <label for="client_group" class="control-label">{{tr .t "form.group"}}</label>
+                                <input type="text" class="form-control" id="client_group" name="client_group" placeholder="{{tr .t "form.group_placeholder"}}">
                             </div>
                             <div class="form-group">
-                                <label for="subnet_ranges" class="control-label">Subnet range</label>
-                                <select id="subnet_ranges" class="select2" data-placeholder="Select a subnet range" style="width: 100%;">
+                                <label for="subnet_ranges" class="control-label">{{tr .t "form.subnet_range"}}</label>
+                                <select id="subnet_ranges" class="select2" data-placeholder="{{tr .t "form.subnet_range_placeholder"}}" style="width: 100%;">
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="client_allocated_ips" class="control-label">IP Allocation</label>
+                                <label for="client_allocated_ips" class="control-label">{{tr .t "form.ip_allocation"}}</label>
                                 <input type="text" data-role="tagsinput" class="form-control" id="client_allocated_ips">
                             </div>
                             <div class="form-group">
-                                <label for="client_allowed_ips" class="control-label">Allowed IPs - What subnet traffic should go through WireGuard.
-                                    <i class="fas fa-info-circle" data-toggle="tooltip" data-original-title="Specify a list of addresses that will get routed to the server. These addresses will be included in 'AllowedIPs' of client config">
+                                <label for="client_allowed_ips" class="control-label">{{tr .t "form.allowed_ips"}}
+                                    <i class="fas fa-info-circle" data-toggle="tooltip" data-original-title="{{tr .t "form.allowed_ips_tooltip"}}">
                                     </i>
                                 </label>
                                 <input type="text" data-role="tagsinput" class="form-control" id="client_allowed_ips" value="{{ StringsJoin .client_defaults.AllowedIPs "," }}">
                             </div>
                             <div class="form-group" style="display:none;">
-                                <label for="client_extra_allowed_ips" class="control-label">Extra Allowed IPs
-                                    <i class="fas fa-info-circle" data-toggle="tooltip" data-original-title="Specify a list of addresses that will get routed to the client. These addresses will be included in 'AllowedIPs' of WG server config">
+                                <label for="client_extra_allowed_ips" class="control-label">{{tr .t "form.extra_allowed_ips"}}
+                                    <i class="fas fa-info-circle" data-toggle="tooltip" data-original-title="{{tr .t "form.extra_allowed_ips_tooltip"}}">
                                     </i>
                                 </label>
                                 <input type="text" data-role="tagsinput" class="form-control" id="client_extra_allowed_ips" value="{{ StringsJoin .client_defaults.ExtraAllowedIPs "," }}">
                             </div>
                             <div class="form-group" style="display:none;">
-                                <label for="client_endpoint" class="control-label">Endpoint</label>
+                                <label for="client_endpoint" class="control-label">{{tr .t "form.endpoint"}}</label>
                                 <input type="text" class="form-control" id="client_endpoint" name="client_endpoint">
                             </div>
                             <div class="form-group">
                                 <div class="icheck-primary d-inline">
                                     <input type="checkbox" id="use_server_dns" {{ if .client_defaults.UseServerDNS }}checked{{ end }}>
-                                    <label for="use_server_dns">Use server DNS</label>
+                                    <label for="use_server_dns">{{tr .t "form.use_server_dns"}}</label>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <div class="icheck-primary d-inline">
                                     <input type="checkbox" id="enabled" {{ if .client_defaults.EnableAfterCreation }}checked{{ end }}>
-                                    <label for="enabled">Enable after creation</label>
+                                    <label for="enabled">{{tr .t "form.enable_after_creation"}}</label>
                                 </div>
                             </div>
                             <details>
                                 <summary>
-                                    <strong>Public and Preshared Keys</strong>
-                                    <i class="fas fa-info-circle" data-toggle="tooltip" data-original-title="If you don't want the server to generate and store the client's private key, you can manually specify its public and preshared key here. Note: QR code will not be generated">
+                                    <strong>{{tr .t "form.keys_section_title"}}</strong>
+                                    <i class="fas fa-info-circle" data-toggle="tooltip" data-original-title="{{tr .t "form.keys_section_tooltip"}}">
                                     </i>
                                 </summary>
                                 <div class="form-group" style="margin-top: 1rem">
-                                    <label for="client_public_key" class="control-label">Public Key</label>
-                                    <input type="text" class="form-control" id="client_public_key" name="client_public_key" placeholder="Autogenerated" aria-invalid="false">
+                                    <label for="client_public_key" class="control-label">{{tr .t "form.public_key"}}</label>
+                                    <input type="text" class="form-control" id="client_public_key" name="client_public_key" placeholder="{{tr .t "form.public_key_placeholder"}}" aria-invalid="false">
                                 </div>
                                 <div class="form-group">
-                                    <label for="client_preshared_key" class="control-label">Preshared Key</label>
-                                    <input type="text" class="form-control" id="client_preshared_key" name="client_preshared_key" placeholder="Autogenerated - enter &quot;-&quot; to skip generation">
+                                    <label for="client_preshared_key" class="control-label">{{tr .t "form.preshared_key"}}</label>
+                                    <input type="text" class="form-control" id="client_preshared_key" name="client_preshared_key" placeholder="{{tr .t "form.preshared_key_placeholder"}}">
                                 </div>
                             </details>
                         </div>
                         <div class="modal-footer justify-content-between">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">{{tr .t "modal.cancel"}}</button>
+                            <button type="submit" class="btn btn-primary">{{tr .t "modal.submit"}}</button>
                         </div>
                     </form>
                 </div>
@@ -356,17 +366,17 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Apply Config</h4>
+                        <h4 class="modal-title">{{tr .t "modal.apply_config_title"}}</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <p>Do you want to write config file and restart WireGuard server?</p>
+                        <p>{{tr .t "modal.apply_config_message"}}</p>
                     </div>
                     <div class="modal-footer justify-content-between">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger" id="apply_config_confirm">Apply</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">{{tr .t "modal.cancel"}}</button>
+                        <button type="button" class="btn btn-danger" id="apply_config_confirm">{{tr .t "modal.apply"}}</button>
                     </div>
                 </div>
                 <!-- /.modal-content -->
@@ -396,9 +406,9 @@
 
         <footer class="main-footer">
             <div class="float-right d-none d-sm-block">
-                <b>Version</b> {{ .appVersion }}
+                <b>{{tr .t "footer.version"}}</b> {{ .appVersion }}
             </div>
-            <strong>Copyright &copy; <script>document.write(new Date().getFullYear())</script> <a href="https://github.com/swissmakers/wireguard-manager">WireGuard Manager</a>.</strong> All rights reserved.
+            <strong>{{tr .t "footer.copyright"}} &copy; <script>document.write(new Date().getFullYear())</script> <a href="https://github.com/swissmakers/wireguard-manager">WireGuard Manager</a>.</strong> {{tr .t "footer.all_rights_reserved"}}
         </footer>
 
         <!-- Control Sidebar -->

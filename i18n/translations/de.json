@@ -1,0 +1,83 @@
+{
+  "app_title": "WireGuard Manager",
+  "brand_title": "WIREGUARD MANAGER",
+  "nav": {
+    "search_placeholder": "Suchen",
+    "new_client": "Neuer Client",
+    "apply_config": "Konfiguration anwenden",
+    "logout": "Abmelden",
+    "my_account": "Mein Konto",
+    "main": "HAUPTMENÜ",
+    "vpn_clients": "VPN-Clients",
+    "vpn_connected": "VPN-Verbindungen",
+    "settings": "EINSTELLUNGEN",
+    "wg_server": "WireGuard-Server",
+    "client_config_settings": "Client-Konfiguration",
+    "wgm_user_accounts": "WGM-Benutzerkonten",
+    "api": "API",
+    "api_key_management": "API-Schlüsselverwaltung",
+    "api_statistics": "API-Statistiken"
+  },
+  "status": {
+    "all": "Alle",
+    "enabled": "Aktiviert",
+    "disabled": "Deaktiviert",
+    "connected": "Verbunden",
+    "disconnected": "Getrennt"
+  },
+  "modal": {
+    "new_client_title": "Neuer WireGuard-Client",
+    "apply_config_title": "Konfiguration anwenden",
+    "apply_config_message": "Möchten Sie die Konfigurationsdatei schreiben und den WireGuard-Server neu starten?",
+    "email_config_title": "E-Mail-Konfiguration",
+    "cancel": "Abbrechen",
+    "submit": "Absenden",
+    "apply": "Anwenden"
+  },
+  "form": {
+    "name": "Name",
+    "email": "E-Mail",
+    "group": "Gruppe",
+    "group_placeholder": "Optionaler Gruppenname",
+    "subnet_range": "Subnetzbereich",
+    "subnet_range_placeholder": "Wählen Sie einen Subnetzbereich",
+    "ip_allocation": "IP-Zuweisung",
+    "allowed_ips": "Erlaubte IPs - Welcher Subnetz-Datenverkehr soll über WireGuard geleitet werden.",
+    "allowed_ips_tooltip": "Geben Sie eine Liste von Adressen an, die zum Server weitergeleitet werden. Diese Adressen werden in 'AllowedIPs' der Client-Konfiguration aufgenommen",
+    "extra_allowed_ips": "Zusätzliche erlaubte IPs",
+    "extra_allowed_ips_tooltip": "Geben Sie eine Liste von Adressen an, die zum Client weitergeleitet werden. Diese Adressen werden in 'AllowedIPs' der WG-Server-Konfiguration aufgenommen",
+    "endpoint": "Endpunkt",
+    "use_server_dns": "Server-DNS verwenden",
+    "enable_after_creation": "Nach Erstellung aktivieren",
+    "public_key": "Öffentlicher Schlüssel",
+    "public_key_placeholder": "Automatisch generiert",
+    "preshared_key": "Vorverteilter Schlüssel",
+    "preshared_key_placeholder": "Automatisch generiert - geben Sie \"-\" ein, um die Generierung zu überspringen",
+    "keys_section_title": "Öffentliche und vorverteilte Schlüssel",
+    "keys_section_tooltip": "Wenn Sie nicht möchten, dass der Server den privaten Schlüssel des Clients generiert und speichert, können Sie hier manuell den öffentlichen und vorverteilten Schlüssel angeben. Hinweis: QR-Code wird nicht generiert",
+    "email_address": "E-Mail-Adresse",
+    "add_more": "Weitere hinzufügen"
+  },
+  "page": {
+    "vpn_clients_title": "VPN WireGuard-Clients"
+  },
+  "footer": {
+    "version": "Version",
+    "copyright": "Copyright",
+    "all_rights_reserved": "Alle Rechte vorbehalten."
+  },
+  "messages": {
+    "created_successfully": "Neuer Client erfolgreich erstellt",
+    "applied_successfully": "Konfiguration erfolgreich angewendet",
+    "email_sent_successfully": "E-Mail erfolgreich gesendet",
+    "updated_successfully": "Client erfolgreich aktualisiert",
+    "deleted_successfully": "Client entfernt",
+    "error_creating": "Fehler beim Erstellen des Clients.",
+    "error_applying": "Fehler beim Anwenden der Konfiguration.",
+    "error_sending_email": "Fehler beim Senden der E-Mail.",
+    "error_loading": "Fehler beim Laden der Client-Daten.",
+    "error_suggesting": "Fehler beim Vorschlagen der IP-Zuweisung.",
+    "config_check_error": "Fehler beim Überprüfen der Konfigurationsänderungen.",
+    "please_enter_name": "Bitte geben Sie einen Namen ein"
+  }
+}

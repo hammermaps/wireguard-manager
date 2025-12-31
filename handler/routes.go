@@ -21,6 +21,7 @@ import (
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 
 	"github.com/swissmakers/wireguard-manager/emailer"
+	"github.com/swissmakers/wireguard-manager/i18n"
 	"github.com/swissmakers/wireguard-manager/model"
 	"github.com/swissmakers/wireguard-manager/store"
 	"github.com/swissmakers/wireguard-manager/util"
@@ -77,6 +78,34 @@ func Favicon() echo.HandlerFunc {
 			return c.File(favicon)
 		}
 		return c.Redirect(http.StatusFound, util.BasePath+"/static/custom/img/favicon.ico")
+	}
+}
+
+// SetLanguage handler sets the user's preferred language
+func SetLanguage() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		lang := c.QueryParam("lang")
+		if lang == "" {
+			lang = i18n.DefaultLanguage // use constant
+		}
+
+		// Set language cookie
+		cookie := &http.Cookie{
+			Name:     "language",
+			Value:    lang,
+			Path:     util.GetCookiePath(),
+			MaxAge:   86400 * 365, // 1 year
+			HttpOnly: false,       // Allow JavaScript to read it
+			SameSite: http.SameSiteLaxMode,
+		}
+		c.SetCookie(cookie)
+
+		// Redirect back to the referring page or home
+		referer := c.Request().Header.Get("Referer")
+		if referer == "" {
+			referer = util.BasePath + "/"
+		}
+		return c.Redirect(http.StatusFound, referer)
 	}
 }
 
