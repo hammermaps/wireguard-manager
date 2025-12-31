@@ -674,6 +674,12 @@ func RandomString(length int) string {
 	return string(b)
 }
 
+// GenerateRandomPassword generates a secure random password of the specified length.
+// The password contains uppercase letters, lowercase letters, and digits.
+func GenerateRandomPassword(length int) string {
+	return RandomString(length)
+}
+
 // ManagePerms sets file permissions to 0600.
 func ManagePerms(path string) error {
 	return os.Chmod(path, 0600)
