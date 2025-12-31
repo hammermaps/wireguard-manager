@@ -21,6 +21,11 @@ var SupportedLanguages = []string{"en", "de"}
 // DefaultLanguage is the fallback language
 const DefaultLanguage = "en"
 
+// NormalizeLanguageCode normalizes a language code to 2-letter format
+func NormalizeLanguageCode(lang string) string {
+	return strings.ToLower(strings.Split(lang, "-")[0])
+}
+
 // Init loads all translation files
 func Init() error {
 	for _, lang := range SupportedLanguages {
@@ -42,7 +47,7 @@ func Init() error {
 // GetTranslation returns the translation map for a given language
 func GetTranslation(lang string) Translation {
 	// Normalize language code (e.g., "en-US" -> "en")
-	lang = strings.ToLower(strings.Split(lang, "-")[0])
+	lang = NormalizeLanguageCode(lang)
 
 	if t, ok := translations[lang]; ok {
 		return t
@@ -91,7 +96,7 @@ func GetLanguageFromAcceptHeader(acceptLang string) string {
 		// Remove quality factor if present
 		lang = strings.TrimSpace(strings.Split(lang, ";")[0])
 		// Normalize to just the language code
-		langCode := strings.ToLower(strings.Split(lang, "-")[0])
+		langCode := NormalizeLanguageCode(lang)
 
 		// Check if we support this language
 		for _, supported := range SupportedLanguages {

@@ -143,9 +143,13 @@ func New(tmplDir fs.FS, extraData map[string]interface{}, secret [64]byte) *echo
 		"StringsJoin": strings.Join,
 		"tr": func(t interface{}, key string) string {
 			// Helper function to access nested translation keys
+			// Get the language from template context
 			if trans, ok := t.(i18n.Translation); ok {
+				// Try to determine language - use a simple approach by checking first key
+				// Since we already have the translation map for the specific language
+				// we can directly use the T function by extracting values
 				keys := strings.Split(key, ".")
-				var current interface{} = trans
+				var current interface{} = map[string]interface{}(trans)
 				for _, k := range keys {
 					if m, ok := current.(map[string]interface{}); ok {
 						if val, exists := m[k]; exists {

@@ -21,6 +21,7 @@ import (
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 
 	"github.com/swissmakers/wireguard-manager/emailer"
+	"github.com/swissmakers/wireguard-manager/i18n"
 	"github.com/swissmakers/wireguard-manager/model"
 	"github.com/swissmakers/wireguard-manager/store"
 	"github.com/swissmakers/wireguard-manager/util"
@@ -85,7 +86,7 @@ func SetLanguage() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		lang := c.QueryParam("lang")
 		if lang == "" {
-			lang = "en"
+			lang = i18n.DefaultLanguage // use constant
 		}
 
 		// Set language cookie
