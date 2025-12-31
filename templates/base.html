@@ -240,6 +240,19 @@
                             </a>
                         </li>
                         {{end}}
+                        <li class="nav-header">API</li>
+                        <li class="nav-item">
+                            <a href="{{.basePath}}/api-keys" class="nav-link {{if eq .baseData.Active "api-keys" }}active{{end}}">
+                                <i class="nav-icon fas fa-key"></i>
+                                <p>API Key Management</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{.basePath}}/api-statistics" class="nav-link {{if eq .baseData.Active "api-statistics" }}active{{end}}">
+                                <i class="nav-icon fas fa-chart-bar"></i>
+                                <p>API Statistics</p>
+                            </a>
+                        </li>
                         {{end}}
                     </ul>
                 </nav>

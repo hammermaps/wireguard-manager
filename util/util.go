@@ -749,3 +749,26 @@ func GetPersistedSessionSecret() string {
 	}
 	return newSecret
 }
+
+// GetClientIPFromRequest extracts the client IP address from HTTP request
+func GetClientIPFromRequest(remoteAddr string, forwardedFor string, realIP string) string {
+	// Check if behind a proxy
+	if Proxy {
+		if forwardedFor != "" {
+			// Get the first IP in the chain
+			ips := strings.Split(forwardedFor, ",")
+			if len(ips) > 0 {
+				return strings.TrimSpace(ips[0])
+			}
+		}
+		if realIP != "" {
+			return realIP
+		}
+	}
+	
+	// Strip port if present
+	if host, _, err := net.SplitHostPort(remoteAddr); err == nil {
+		return host
+	}
+	return remoteAddr
+}

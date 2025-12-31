@@ -36,4 +36,16 @@ type IStore interface {
 	// Hash Management for Config Change Detection
 	SaveHashes(hashes model.ClientServerHashes) error
 	GetHashes() (model.ClientServerHashes, error)
+
+	// API Key Management
+	GetAPIKeys() ([]model.APIKey, error)
+	GetAPIKeyByID(keyID string) (model.APIKey, error)
+	GetAPIKeyByKey(key string) (model.APIKey, error)
+	SaveAPIKey(key model.APIKey) error
+	DeleteAPIKey(keyID string) error
+
+	// API Access Log Management
+	SaveAPIAccessLog(log model.APIAccessLog) error
+	GetAPIAccessLogs(limit int) ([]model.APIAccessLog, error)
+	GetAPIAccessLogsByKeyID(keyID string, limit int) ([]model.APIAccessLog, error)
 }

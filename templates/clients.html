@@ -273,6 +273,35 @@ VPN WireGuard Clients
             updateApplyConfigVisibility()
         }
 
+        function setGroupStatus(groupName, enabled) {
+            const action = enabled ? 'enable' : 'disable';
+            if (!confirm(`Are you sure you want to ${action} all clients in group "${groupName}"?`)) {
+                return;
+            }
+
+            $.ajax({
+                cache: false,
+                method: 'POST',
+                url: '{{.basePath}}/api/group/set-status',
+                dataType: 'json',
+                contentType: "application/json",
+                data: JSON.stringify({
+                    group: groupName,
+                    enabled: enabled
+                }),
+                success: function(data) {
+                    toastr.success(data['message']);
+                    // Reload the client list
+                    $.getJSON("{{.basePath}}/api/clients", null, renderClientList);
+                    updateApplyConfigVisibility();
+                },
+                error: function(jqXHR, exception) {
+                    const responseJson = jQuery.parseJSON(jqXHR.responseText);
+                    toastr.error(responseJson['message']);
+                }
+            });
+        }
+
         // updateIPAllocationSuggestion function for automatically fill
         // the IP Allocation input with suggested ip addresses
         // FOR CHANGING A SUBNET OF AN EXISTING CLIENT
