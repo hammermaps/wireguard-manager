@@ -26,7 +26,18 @@ pipeline {
                             exit 1
                         fi
                         node --version
-                        npm --version
+                        
+                        # Check for npm or yarn
+                        if command -v yarn &> /dev/null || command -v yarnpkg &> /dev/null; then
+                            echo "Using yarn package manager"
+                            command -v yarn &> /dev/null && yarn --version || yarnpkg --version
+                        elif command -v npm &> /dev/null; then
+                            echo "Using npm package manager"
+                            npm --version
+                        else
+                            echo "Neither npm nor yarn found, please install a package manager"
+                            exit 1
+                        fi
                     '''
                 }
             }
