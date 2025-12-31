@@ -142,12 +142,10 @@ func New(tmplDir fs.FS, extraData map[string]interface{}, secret [64]byte) *echo
 	funcs := template.FuncMap{
 		"StringsJoin": strings.Join,
 		"tr": func(t interface{}, key string) string {
-			// Helper function to access nested translation keys
-			// Get the language from template context
+			// Helper function to access nested translation keys from the translation map
+			// This receives the already-selected translation map for the current language
 			if trans, ok := t.(i18n.Translation); ok {
-				// Try to determine language - use a simple approach by checking first key
-				// Since we already have the translation map for the specific language
-				// we can directly use the T function by extracting values
+				// Navigate through nested keys (e.g., "nav.new_client" -> nav -> new_client)
 				keys := strings.Split(key, ".")
 				var current interface{} = map[string]interface{}(trans)
 				for _, k := range keys {
@@ -155,10 +153,10 @@ func New(tmplDir fs.FS, extraData map[string]interface{}, secret [64]byte) *echo
 						if val, exists := m[k]; exists {
 							current = val
 						} else {
-							return key
+							return key // Key not found, return the key path as fallback
 						}
 					} else {
-						return key
+						return key // Not a map, return the key path as fallback
 					}
 				}
 				if str, ok := current.(string); ok {
