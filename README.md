@@ -40,7 +40,8 @@ WireGuard Manager is an open-source web application written in Go that simplifie
 5. [Build From Source](#build-from-source)
    - [Build Docker Image](#build-docker-image)
    - [Build Binary File](#build-binary-file)
-6. [License](#license)
+6. [Development Setup](#development-setup)
+7. [License](#license)
 
 ---
 
@@ -476,6 +477,25 @@ docker compose build \
    ```bash
    ./wireguard-manager
    ```
+
+---
+
+## Development Setup
+
+For developers who want to work on this project, we provide comprehensive development setup documentation:
+
+- **[DEVELOPMENT.md](DEVELOPMENT.md)** - Complete development setup guide (English)
+  - JetBrains GoLand/IntelliJ IDEA configuration
+  - Pre-configured run and debug configurations
+  - Jenkins CI/CD pipeline setup
+  - Manual build instructions
+  - Troubleshooting tips
+
+- **[DEVELOPMENT_DE.md](DEVELOPMENT_DE.md)** - Quick start guide (German/Deutsch)
+
+The project includes ready-to-use configurations for:
+- **GoLand/IntelliJ IDEA**: Debug and build configurations in the `.idea` directory
+- **Jenkins**: Automated build pipeline with `Jenkinsfile` for Linux and Windows x64
 
 ---
 

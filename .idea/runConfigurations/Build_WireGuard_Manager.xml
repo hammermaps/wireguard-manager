@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Build WireGuard Manager" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="wireguard-manager" />
+    <working_directory value="$PROJECT_DIR$" />
+    <go_parameters value="-ldflags=&quot;-X 'main.appVersion=dev' -X 'main.gitCommit=local' -X 'main.gitRef=refs/heads/local' -X 'main.buildTime=development-build'&quot;" />
+    <kind value="PACKAGE" />
+    <package value="github.com/swissmakers/wireguard-manager" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/main.go" />
+    <output_directory value="$PROJECT_DIR$" />
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Prepare Assets" run_configuration_type="ShConfigurationType" />
+    </method>
+  </configuration>
+</component>
