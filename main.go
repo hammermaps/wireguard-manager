@@ -18,6 +18,7 @@ import (
 	"github.com/labstack/gommon/log"
 	"github.com/swissmakers/wireguard-manager/emailer"
 	"github.com/swissmakers/wireguard-manager/handler"
+	"github.com/swissmakers/wireguard-manager/i18n"
 	"github.com/swissmakers/wireguard-manager/model"
 	"github.com/swissmakers/wireguard-manager/router"
 	"github.com/swissmakers/wireguard-manager/store"
@@ -173,6 +174,11 @@ func init() {
 }
 
 func main() {
+	// Initialize translations
+	if err := i18n.Init(); err != nil {
+		log.Fatalf("Error initializing translations: %v", err)
+	}
+
 	// Initialize the database store based on the configured type.
 	var db store.IStore
 	var err error
@@ -274,6 +280,7 @@ func main() {
 	}
 
 	// Additional API and page routes.
+	app.GET(util.BasePath+"/set-language", handler.SetLanguage())
 	app.GET(util.BasePath+"/test-hash", handler.GetHashesChanges(db), handler.ValidSession)
 	app.GET(util.BasePath+"/_health", handler.Health())
 	app.GET(util.BasePath+"/favicon", handler.Favicon())

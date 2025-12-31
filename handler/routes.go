@@ -80,6 +80,34 @@ func Favicon() echo.HandlerFunc {
 	}
 }
 
+// SetLanguage handler sets the user's preferred language
+func SetLanguage() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		lang := c.QueryParam("lang")
+		if lang == "" {
+			lang = "en"
+		}
+
+		// Set language cookie
+		cookie := &http.Cookie{
+			Name:     "language",
+			Value:    lang,
+			Path:     util.GetCookiePath(),
+			MaxAge:   86400 * 365, // 1 year
+			HttpOnly: false,       // Allow JavaScript to read it
+			SameSite: http.SameSiteLaxMode,
+		}
+		c.SetCookie(cookie)
+
+		// Redirect back to the referring page or home
+		referer := c.Request().Header.Get("Referer")
+		if referer == "" {
+			referer = util.BasePath + "/"
+		}
+		return c.Redirect(http.StatusFound, referer)
+	}
+}
+
 // LoginPage handler renders the login page.
 func LoginPage() echo.HandlerFunc {
 	return func(c echo.Context) error {

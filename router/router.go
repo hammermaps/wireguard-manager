@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/swissmakers/wireguard-manager/i18n"
 	"github.com/swissmakers/wireguard-manager/util"
 )
 
@@ -36,6 +37,19 @@ func (t *TemplateRegistry) Render(w io.Writer, name string, data interface{}, c 
 			m[k] = v
 		}
 		m["client_defaults"] = util.ClientDefaultsFromEnv()
+		
+		// Detect language from cookie or Accept-Language header
+		lang := i18n.DefaultLanguage
+		if cookie, err := c.Cookie("language"); err == nil && cookie.Value != "" {
+			lang = cookie.Value
+		} else {
+			acceptLang := c.Request().Header.Get("Accept-Language")
+			lang = i18n.GetLanguageFromAcceptHeader(acceptLang)
+		}
+		
+		// Add translations and current language to template data
+		m["lang"] = lang
+		m["t"] = i18n.GetTranslation(lang)
 	}
 
 	// For the login page, no base layout is needed.
@@ -127,6 +141,24 @@ func New(tmplDir fs.FS, extraData map[string]interface{}, secret [64]byte) *echo
 	// Create a function map for templates.
 	funcs := template.FuncMap{
 		"StringsJoin": strings.Join,
+		"tr": func(t interface{}, key string) string {
+			// Helper function to access nested translation keys
+			if trans, ok := t.(i18n.Translation); ok {
+				keys := strings.Split(key, ".")
+				var current interface{} = trans
+				for _, k := range keys {
+					if m, ok := current.(map[string]interface{}); ok {
+						current = m[k]
+					} else {
+						return key
+					}
+				}
+				if str, ok := current.(string); ok {
+					return str
+				}
+			}
+			return key
+		},
 	}
 
 	// Build the map of templates.
