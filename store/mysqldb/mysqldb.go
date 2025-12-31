@@ -332,7 +332,7 @@ func (o *MySQLDB) initializeDefaultData() error {
 			log.Infof("Password: %s", plaintext)
 
 			// Write password to log file
-			logFilePath := path.Join("db", "initial_admin_password.log")
+			logFilePath := path.Join("./db", "initial_admin_password.log")
 			logContent := fmt.Sprintf("=== INITIAL ADMIN PASSWORD CREATED ===\n")
 			logContent += fmt.Sprintf("Username: %s\n", user.Username)
 			logContent += fmt.Sprintf("Password: %s\n", plaintext)
