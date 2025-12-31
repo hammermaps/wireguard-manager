@@ -66,6 +66,9 @@ const (
 	DefaultClientExtraAllowedIpsEnvVar     = "WGM_DEFAULT_CLIENT_EXTRA_ALLOWED_IPS"
 	DefaultClientUseServerDNSEnvVar        = "WGM_DEFAULT_CLIENT_USE_SERVER_DNS"
 	DefaultClientEnableAfterCreationEnvVar = "WGM_DEFAULT_CLIENT_ENABLE_AFTER_CREATION"
+	DatabaseTypeEnvVar                     = "WGM_DATABASE_TYPE"
+	DatabaseDSNEnvVar                      = "WGM_DATABASE_DSN"
+	DatabasePathEnvVar                     = "WGM_DATABASE_PATH"
 )
 
 // ParseBasePath ensures that the base path starts with a slash and does not end with one.
