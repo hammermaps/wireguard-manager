@@ -57,7 +57,7 @@ func (t *TemplateRegistry) Render(w io.Writer, name string, data interface{}, c 
 		return tmpl.Execute(w, data)
 	}
 
-	return tmpl.ExecuteTemplate(w, "base.html", data)
+	return tmpl.Execute(w, data)
 }
 
 // New creates and configures an Echo router.
