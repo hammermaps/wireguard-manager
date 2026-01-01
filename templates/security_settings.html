@@ -1,0 +1,459 @@
+{{define "title"}}
+Security Settings
+{{end}}
+
+{{define "top_css"}}
+{{end}}
+
+{{define "username"}}
+{{ .username }}
+{{end}}
+
+{{define "page_title"}}
+Security Settings
+{{end}}
+
+{{define "page_content"}}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Brute Force Protection -->
+            <div class="col-md-6">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">{{tr .t "security.brute_force_protection"}}</h3>
+                    </div>
+                    <form role="form" id="frm_brute_force">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="brute_force_enabled">
+                                    <label class="custom-control-label" for="brute_force_enabled">{{tr .t "security.enable_brute_force"}}</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="max_attempts">{{tr .t "security.max_attempts"}}</label>
+                                <input type="number" class="form-control" id="max_attempts" min="1" max="20" value="5">
+                                <small class="form-text text-muted">{{tr .t "security.max_attempts_help"}}</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="window_minutes">{{tr .t "security.time_window"}}</label>
+                                <input type="number" class="form-control" id="window_minutes" min="1" max="60" value="15">
+                                <small class="form-text text-muted">{{tr .t "security.time_window_help"}}</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="block_minutes">{{tr .t "security.block_duration"}}</label>
+                                <input type="number" class="form-control" id="block_minutes" min="1" max="1440" value="30">
+                                <small class="form-text text-muted">{{tr .t "security.block_duration_help"}}</small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- IP Blocking -->
+            <div class="col-md-6">
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title">{{tr .t "security.ip_blocking"}}</h3>
+                    </div>
+                    <form role="form" id="frm_ip_blocking">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="ip_blocking_enabled">
+                                    <label class="custom-control-label" for="ip_blocking_enabled">{{tr .t "security.enable_ip_blocking"}}</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-primary" id="btn_add_ip_block">
+                                    <i class="fas fa-plus"></i> {{tr .t "security.add_ip_block"}}
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="ip_blocks_table">
+                                    <thead>
+                                        <tr>
+                                            <th>{{tr .t "security.ip_address"}}</th>
+                                            <th>{{tr .t "security.reason"}}</th>
+                                            <th>{{tr .t "security.expires"}}</th>
+                                            <th>{{tr .t "security.actions"}}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ip_blocks_body">
+                                        <!-- Populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- GeoIP Blocking -->
+            <div class="col-md-6">
+                <div class="card card-danger">
+                    <div class="card-header">
+                        <h3 class="card-title">{{tr .t "security.geoip_blocking"}}</h3>
+                    </div>
+                    <form role="form" id="frm_geoip">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="geoip_enabled">
+                                    <label class="custom-control-label" for="geoip_enabled">{{tr .t "security.enable_geoip"}}</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="geoip_default_action">{{tr .t "security.default_action"}}</label>
+                                <select class="form-control" id="geoip_default_action">
+                                    <option value="allow">{{tr .t "security.allow"}}</option>
+                                    <option value="block">{{tr .t "security.block"}}</option>
+                                </select>
+                                <small class="form-text text-muted">{{tr .t "security.default_action_help"}}</small>
+                            </div>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-primary" id="btn_add_geoip_rule">
+                                    <i class="fas fa-plus"></i> {{tr .t "security.add_geoip_rule"}}
+                                </button>
+                            </div>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> {{tr .t "security.geoip_note"}}
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="geoip_rules_table">
+                                    <thead>
+                                        <tr>
+                                            <th>{{tr .t "security.country"}}</th>
+                                            <th>{{tr .t "security.action"}}</th>
+                                            <th>{{tr .t "security.actions"}}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="geoip_rules_body">
+                                        <!-- Populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="col-md-6">
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">{{tr .t "security.save_settings"}}</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>{{tr .t "security.save_help"}}</p>
+                        <button type="button" class="btn btn-success btn-lg" id="btn_save_security">
+                            <i class="fas fa-save"></i> {{tr .t "security.save"}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal for adding IP block -->
+<div class="modal fade" id="modal_add_ip_block">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">{{tr .t "security.add_ip_block"}}</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="frm_add_ip_block">
+                    <div class="form-group">
+                        <label for="block_ip">{{tr .t "security.ip_address"}}</label>
+                        <input type="text" class="form-control" id="block_ip" placeholder="192.168.1.100" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="block_reason">{{tr .t "security.reason"}}</label>
+                        <input type="text" class="form-control" id="block_reason" placeholder="{{tr .t "security.reason_placeholder"}}">
+                    </div>
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="block_permanent">
+                            <label class="custom-control-label" for="block_permanent">{{tr .t "security.permanent_block"}}</label>
+                        </div>
+                    </div>
+                    <div class="form-group" id="block_duration_group">
+                        <label for="block_hours">{{tr .t "security.duration_hours"}}</label>
+                        <input type="number" class="form-control" id="block_hours" value="24" min="1">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{tr .t "security.cancel"}}</button>
+                <button type="button" class="btn btn-primary" id="btn_confirm_ip_block">{{tr .t "security.add"}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for adding GeoIP rule -->
+<div class="modal fade" id="modal_add_geoip_rule">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">{{tr .t "security.add_geoip_rule"}}</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="frm_add_geoip_rule">
+                    <div class="form-group">
+                        <label for="geoip_country_code">{{tr .t "security.country_code"}}</label>
+                        <input type="text" class="form-control" id="geoip_country_code" placeholder="US" maxlength="2" required>
+                        <small class="form-text text-muted">{{tr .t "security.country_code_help"}}</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="geoip_country_name">{{tr .t "security.country_name"}}</label>
+                        <input type="text" class="form-control" id="geoip_country_name" placeholder="United States">
+                    </div>
+                    <div class="form-group">
+                        <label for="geoip_action">{{tr .t "security.action"}}</label>
+                        <select class="form-control" id="geoip_action">
+                            <option value="block">{{tr .t "security.block"}}</option>
+                            <option value="allow">{{tr .t "security.allow"}}</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{tr .t "security.cancel"}}</button>
+                <button type="button" class="btn btn-primary" id="btn_confirm_geoip_rule">{{tr .t "security.add"}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "page_script"}}
+<script>
+$(document).ready(function() {
+    // Load security settings
+    loadSecuritySettings();
+    loadIPBlocks();
+    loadGeoIPRules();
+
+    // Permanent block checkbox toggle
+    $('#block_permanent').change(function() {
+        if ($(this).is(':checked')) {
+            $('#block_duration_group').hide();
+        } else {
+            $('#block_duration_group').show();
+        }
+    });
+
+    // Add IP block button
+    $('#btn_add_ip_block').click(function() {
+        $('#modal_add_ip_block').modal('show');
+    });
+
+    // Confirm IP block
+    $('#btn_confirm_ip_block').click(function() {
+        const data = {
+            ip: $('#block_ip').val(),
+            reason: $('#block_reason').val(),
+            permanent: $('#block_permanent').is(':checked'),
+            hours: parseInt($('#block_hours').val()) || 24
+        };
+
+        $.ajax({
+            url: '{{.basePath}}/api/security/ip-blocks',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(response) {
+                toastr.success('IP block added successfully');
+                $('#modal_add_ip_block').modal('hide');
+                $('#frm_add_ip_block')[0].reset();
+                loadIPBlocks();
+            },
+            error: function(xhr) {
+                toastr.error('Failed to add IP block: ' + xhr.responseJSON.message);
+            }
+        });
+    });
+
+    // Add GeoIP rule button
+    $('#btn_add_geoip_rule').click(function() {
+        $('#modal_add_geoip_rule').modal('show');
+    });
+
+    // Confirm GeoIP rule
+    $('#btn_confirm_geoip_rule').click(function() {
+        const data = {
+            country_code: $('#geoip_country_code').val().toUpperCase(),
+            country_name: $('#geoip_country_name').val(),
+            action: $('#geoip_action').val()
+        };
+
+        $.ajax({
+            url: '{{.basePath}}/api/security/geoip-rules',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(response) {
+                toastr.success('GeoIP rule added successfully');
+                $('#modal_add_geoip_rule').modal('hide');
+                $('#frm_add_geoip_rule')[0].reset();
+                loadGeoIPRules();
+            },
+            error: function(xhr) {
+                toastr.error('Failed to add GeoIP rule: ' + xhr.responseJSON.message);
+            }
+        });
+    });
+
+    // Save security settings
+    $('#btn_save_security').click(function() {
+        const settings = {
+            brute_force_enabled: $('#brute_force_enabled').is(':checked'),
+            brute_force_max_attempts: parseInt($('#max_attempts').val()),
+            brute_force_window_minutes: parseInt($('#window_minutes').val()),
+            brute_force_block_minutes: parseInt($('#block_minutes').val()),
+            ip_blocking_enabled: $('#ip_blocking_enabled').is(':checked'),
+            geoip_enabled: $('#geoip_enabled').is(':checked'),
+            geoip_default_action: $('#geoip_default_action').val()
+        };
+
+        $.ajax({
+            url: '{{.basePath}}/api/security/settings',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(settings),
+            success: function(response) {
+                toastr.success('Security settings saved successfully');
+            },
+            error: function(xhr) {
+                toastr.error('Failed to save settings: ' + xhr.responseJSON.message);
+            }
+        });
+    });
+
+    function loadSecuritySettings() {
+        $.ajax({
+            url: '{{.basePath}}/api/security/settings',
+            type: 'GET',
+            success: function(settings) {
+                $('#brute_force_enabled').prop('checked', settings.brute_force_enabled);
+                $('#max_attempts').val(settings.brute_force_max_attempts);
+                $('#window_minutes').val(settings.brute_force_window_minutes);
+                $('#block_minutes').val(settings.brute_force_block_minutes);
+                $('#ip_blocking_enabled').prop('checked', settings.ip_blocking_enabled);
+                $('#geoip_enabled').prop('checked', settings.geoip_enabled);
+                $('#geoip_default_action').val(settings.geoip_default_action);
+            }
+        });
+    }
+
+    function loadIPBlocks() {
+        $.ajax({
+            url: '{{.basePath}}/api/security/ip-blocks',
+            type: 'GET',
+            success: function(blocks) {
+                const tbody = $('#ip_blocks_body');
+                tbody.empty();
+                
+                if (blocks.length === 0) {
+                    tbody.append('<tr><td colspan="4" class="text-center">No IP blocks configured</td></tr>');
+                } else {
+                    blocks.forEach(function(block) {
+                        const expires = block.permanent ? 'Permanent' : 
+                            (block.expires_at ? new Date(block.expires_at).toLocaleString() : 'N/A');
+                        const row = `
+                            <tr>
+                                <td>${block.ip}</td>
+                                <td>${block.reason || '-'}</td>
+                                <td>${expires}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteIPBlock('${block.id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                }
+            }
+        });
+    }
+
+    function loadGeoIPRules() {
+        $.ajax({
+            url: '{{.basePath}}/api/security/geoip-rules',
+            type: 'GET',
+            success: function(rules) {
+                const tbody = $('#geoip_rules_body');
+                tbody.empty();
+                
+                if (rules.length === 0) {
+                    tbody.append('<tr><td colspan="3" class="text-center">No GeoIP rules configured</td></tr>');
+                } else {
+                    rules.forEach(function(rule) {
+                        const row = `
+                            <tr>
+                                <td>${rule.country_code} - ${rule.country_name || 'N/A'}</td>
+                                <td><span class="badge badge-${rule.action === 'block' ? 'danger' : 'success'}">${rule.action}</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteGeoIPRule('${rule.id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                }
+            }
+        });
+    }
+
+    window.deleteIPBlock = function(id) {
+        if (confirm('Are you sure you want to remove this IP block?')) {
+            $.ajax({
+                url: '{{.basePath}}/api/security/ip-blocks',
+                type: 'DELETE',
+                contentType: 'application/json',
+                data: JSON.stringify({ id: id }),
+                success: function() {
+                    toastr.success('IP block removed');
+                    loadIPBlocks();
+                },
+                error: function(xhr) {
+                    toastr.error('Failed to remove IP block: ' + xhr.responseJSON.message);
+                }
+            });
+        }
+    };
+
+    window.deleteGeoIPRule = function(id) {
+        if (confirm('Are you sure you want to remove this GeoIP rule?')) {
+            $.ajax({
+                url: '{{.basePath}}/api/security/geoip-rules',
+                type: 'DELETE',
+                contentType: 'application/json',
+                data: JSON.stringify({ id: id }),
+                success: function() {
+                    toastr.success('GeoIP rule removed');
+                    loadGeoIPRules();
+                },
+                error: function(xhr) {
+                    toastr.error('Failed to remove GeoIP rule: ' + xhr.responseJSON.message);
+                }
+            });
+        }
+    };
+});
+</script>
+{{end}}
+
+{{template "base.html" .}}

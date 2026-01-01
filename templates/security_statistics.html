@@ -1,0 +1,384 @@
+{{define "title"}}
+Security Statistics
+{{end}}
+
+{{define "top_css"}}
+{{end}}
+
+{{define "username"}}
+{{ .username }}
+{{end}}
+
+{{define "page_title"}}
+Security Statistics
+{{end}}
+
+{{define "page_content"}}
+<section class="content">
+    <div class="container-fluid">
+        <!-- Statistics Cards -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3 id="stat_total_events">0</h3>
+                        <p>{{tr .t "security.total_events"}}</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3 id="stat_failed_logins">0</h3>
+                        <p>{{tr .t "security.failed_logins"}}</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-user-lock"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3 id="stat_blocked_ips">0</h3>
+                        <p>{{tr .t "security.blocked_ips"}}</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-secondary">
+                    <div class="inner">
+                        <h3 id="stat_brute_force">0</h3>
+                        <p>{{tr .t "security.brute_force_attempts"}}</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Security Events -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">{{tr .t "security.recent_events"}}</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" id="btn_refresh">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="events_table">
+                                <thead>
+                                    <tr>
+                                        <th>{{tr .t "security.timestamp"}}</th>
+                                        <th>{{tr .t "security.event_type"}}</th>
+                                        <th>{{tr .t "security.ip_address"}}</th>
+                                        <th>{{tr .t "security.username"}}</th>
+                                        <th>{{tr .t "security.description"}}</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="events_body">
+                                    <!-- Populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Offending IPs -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card card-danger">
+                    <div class="card-header">
+                        <h3 class="card-title">{{tr .t "security.top_ips"}}</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="top_ips_table">
+                                <thead>
+                                    <tr>
+                                        <th>{{tr .t "security.ip_address"}}</th>
+                                        <th>{{tr .t "security.event_count"}}</th>
+                                        <th>{{tr .t "security.actions"}}</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top_ips_body">
+                                    <!-- Populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Events by Type -->
+            <div class="col-md-6">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">{{tr .t "security.events_by_type"}}</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="events_by_type_table">
+                                <thead>
+                                    <tr>
+                                        <th>{{tr .t "security.event_type"}}</th>
+                                        <th>{{tr .t "security.count"}}</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="events_by_type_body">
+                                    <!-- Populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal for blocking IP from statistics -->
+<div class="modal fade" id="modal_block_ip">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">{{tr .t "security.block_ip"}}</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="frm_block_ip">
+                    <div class="form-group">
+                        <label for="quick_block_ip">{{tr .t "security.ip_address"}}</label>
+                        <input type="text" class="form-control" id="quick_block_ip" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="quick_block_reason">{{tr .t "security.reason"}}</label>
+                        <input type="text" class="form-control" id="quick_block_reason" value="Suspicious activity detected">
+                    </div>
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="quick_block_permanent">
+                            <label class="custom-control-label" for="quick_block_permanent">{{tr .t "security.permanent_block"}}</label>
+                        </div>
+                    </div>
+                    <div class="form-group" id="quick_block_duration_group">
+                        <label for="quick_block_hours">{{tr .t "security.duration_hours"}}</label>
+                        <input type="number" class="form-control" id="quick_block_hours" value="24" min="1">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{tr .t "security.cancel"}}</button>
+                <button type="button" class="btn btn-danger" id="btn_confirm_quick_block">{{tr .t "security.block"}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "page_script"}}
+<script>
+$(document).ready(function() {
+    let currentBlockIP = '';
+
+    // Load statistics on page load
+    loadStatistics();
+    loadEvents();
+
+    // Refresh button
+    $('#btn_refresh').click(function() {
+        $(this).find('i').addClass('fa-spin');
+        loadStatistics();
+        loadEvents();
+        setTimeout(() => {
+            $(this).find('i').removeClass('fa-spin');
+        }, 1000);
+    });
+
+    // Permanent block checkbox toggle
+    $('#quick_block_permanent').change(function() {
+        if ($(this).is(':checked')) {
+            $('#quick_block_duration_group').hide();
+        } else {
+            $('#quick_block_duration_group').show();
+        }
+    });
+
+    // Confirm quick block
+    $('#btn_confirm_quick_block').click(function() {
+        const data = {
+            ip: $('#quick_block_ip').val(),
+            reason: $('#quick_block_reason').val(),
+            permanent: $('#quick_block_permanent').is(':checked'),
+            hours: parseInt($('#quick_block_hours').val()) || 24
+        };
+
+        $.ajax({
+            url: '{{.basePath}}/api/security/ip-blocks',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(response) {
+                toastr.success('IP blocked successfully');
+                $('#modal_block_ip').modal('hide');
+                loadStatistics();
+                loadEvents();
+            },
+            error: function(xhr) {
+                toastr.error('Failed to block IP: ' + xhr.responseJSON.message);
+            }
+        });
+    });
+
+    function loadStatistics() {
+        $.ajax({
+            url: '{{.basePath}}/api/security/statistics',
+            type: 'GET',
+            success: function(stats) {
+                $('#stat_total_events').text(stats.total_events || 0);
+                $('#stat_failed_logins').text(stats.failed_logins || 0);
+                $('#stat_blocked_ips').text(stats.blocked_ips || 0);
+                $('#stat_brute_force').text(stats.brute_force_blocks || 0);
+
+                // Load top IPs
+                loadTopIPs(stats.top_ips || {});
+                
+                // Load events by type
+                loadEventsByType(stats.events_by_type || {});
+            },
+            error: function(xhr) {
+                console.error('Failed to load statistics:', xhr);
+            }
+        });
+    }
+
+    function loadEvents() {
+        $.ajax({
+            url: '{{.basePath}}/api/security/events',
+            type: 'GET',
+            success: function(events) {
+                const tbody = $('#events_body');
+                tbody.empty();
+                
+                if (events.length === 0) {
+                    tbody.append('<tr><td colspan="5" class="text-center">No security events recorded</td></tr>');
+                } else {
+                    events.slice(0, 50).forEach(function(event) {
+                        const timestamp = new Date(event.created_at).toLocaleString();
+                        const eventTypeBadge = getEventTypeBadge(event.event_type);
+                        const row = `
+                            <tr>
+                                <td>${timestamp}</td>
+                                <td>${eventTypeBadge}</td>
+                                <td>${event.ip}</td>
+                                <td>${event.username || '-'}</td>
+                                <td>${event.description}</td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                }
+            },
+            error: function(xhr) {
+                console.error('Failed to load events:', xhr);
+            }
+        });
+    }
+
+    function loadTopIPs(topIPs) {
+        const tbody = $('#top_ips_body');
+        tbody.empty();
+        
+        // Convert object to array and sort by count
+        const sortedIPs = Object.entries(topIPs)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
+        
+        if (sortedIPs.length === 0) {
+            tbody.append('<tr><td colspan="3" class="text-center">No data available</td></tr>');
+        } else {
+            sortedIPs.forEach(function([ip, count]) {
+                const row = `
+                    <tr>
+                        <td>${ip}</td>
+                        <td><span class="badge badge-danger">${count}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="showBlockIPModal('${ip}')">
+                                <i class="fas fa-ban"></i> Block
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+        }
+    }
+
+    function loadEventsByType(eventsByType) {
+        const tbody = $('#events_by_type_body');
+        tbody.empty();
+        
+        // Convert object to array and sort by count
+        const sortedEvents = Object.entries(eventsByType)
+            .sort((a, b) => b[1] - a[1]);
+        
+        if (sortedEvents.length === 0) {
+            tbody.append('<tr><td colspan="2" class="text-center">No data available</td></tr>');
+        } else {
+            sortedEvents.forEach(function([eventType, count]) {
+                const eventTypeBadge = getEventTypeBadge(eventType);
+                const row = `
+                    <tr>
+                        <td>${eventTypeBadge}</td>
+                        <td><span class="badge badge-secondary">${count}</span></td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+        }
+    }
+
+    function getEventTypeBadge(eventType) {
+        const badges = {
+            'failed_login': '<span class="badge badge-warning">Failed Login</span>',
+            'blocked_ip': '<span class="badge badge-danger">Blocked IP</span>',
+            'blocked_geoip': '<span class="badge badge-info">Blocked GeoIP</span>',
+            'brute_force': '<span class="badge badge-dark">Brute Force</span>'
+        };
+        return badges[eventType] || `<span class="badge badge-secondary">${eventType}</span>`;
+    }
+
+    window.showBlockIPModal = function(ip) {
+        currentBlockIP = ip;
+        $('#quick_block_ip').val(ip);
+        $('#quick_block_reason').val('Suspicious activity detected');
+        $('#quick_block_permanent').prop('checked', false);
+        $('#quick_block_hours').val(24);
+        $('#quick_block_duration_group').show();
+        $('#modal_block_ip').modal('show');
+    };
+
+    // Auto-refresh every 30 seconds
+    setInterval(function() {
+        loadStatistics();
+        loadEvents();
+    }, 30000);
+});
+</script>
+{{end}}
+
+{{template "base.html" .}}
