@@ -5,10 +5,18 @@ API Statistics
 {{define "top_css"}}
 <style>
     .stat-card {
-        background-color: #2d2d2d;
         padding: 15px;
         border-radius: 5px;
         margin-bottom: 15px;
+        border: 1px solid;
+    }
+    body.dark-mode .stat-card {
+        background-color: #2a2a2a;
+        border-color: #444;
+    }
+    body.light-mode .stat-card {
+        background-color: #ffffff;
+        border-color: #dee2e6;
     }
     .stat-number {
         font-size: 2em;

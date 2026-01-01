@@ -3,6 +3,31 @@ VPN Connected Users (Peers)
 {{end}}
 
 {{define "top_css"}}
+<style>
+    .stat-card {
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        border: 1px solid;
+    }
+    body.dark-mode .stat-card {
+        background-color: #2a2a2a;
+        border-color: #444;
+    }
+    body.light-mode .stat-card {
+        background-color: #ffffff;
+        border-color: #dee2e6;
+    }
+    .stat-number {
+        font-size: 2em;
+        font-weight: bold;
+        color: #4e73df;
+    }
+    .stat-label {
+        font-size: 0.9em;
+        margin-bottom: 5px;
+    }
+</style>
 {{end}}
 
 {{define "username"}}
@@ -26,7 +51,12 @@ VPN Connected Users (Peers)
     return bytes.toFixed(2) + " " + units[i];
   }
 
-  // Fetch and update the VPN status table.
+  let transferChart = null;
+  let statsData = [];
+  let sortColumn = 5; // Default sort by Total (column 5)
+  let sortAscending = false; // Default to descending
+
+  // Fetch and update the VPN status table and statistics.
   function updateStatusTable() {
   $.ajax({
     url: "{{.basePath}}/api/connection-status",
@@ -36,12 +66,34 @@ VPN Connected Users (Peers)
       console.log("Received API status data:", data);
       var devices = (data && data.devices && Array.isArray(data.devices)) ? data.devices : [];
 
+      // Collect all peers for statistics
+      statsData = [];
+      let totalReceived = 0;
+      let totalTransmitted = 0;
+      let connectedCount = 0;
+      let totalClients = 0;
+
       // Clear the existing rows in the tbody
       var $tbody = $('#status-table-container tbody');
       $tbody.empty();
 
       devices.forEach(function(dev) {
         dev.peers.forEach(function(peer, idx) {
+          totalClients++;
+          totalReceived += peer.received_bytes || 0;
+          totalTransmitted += peer.transmit_bytes || 0;
+          if (peer.connected) connectedCount++;
+
+          // Store peer data for statistics
+          statsData.push({
+            index: idx,
+            name: peer.name,
+            email: peer.email,
+            received: peer.received_bytes || 0,
+            transmitted: peer.transmit_bytes || 0,
+            total: (peer.received_bytes || 0) + (peer.transmit_bytes || 0),
+            connected: peer.connected
+          });
 
           // Create a new row
           var newRow = '<tr ' + (peer.connected ? ' class="table-success"' : '') + '>';
@@ -61,11 +113,181 @@ VPN Connected Users (Peers)
           $tbody.append(newRow);
         });
       });
+
+      // Update statistics cards
+      $('#stat_total_clients').text(totalClients);
+      $('#stat_connected_clients').text(connectedCount);
+      $('#stat_total_received').text(bytesToHumanReadable(totalReceived));
+      $('#stat_total_transmitted').text(bytesToHumanReadable(totalTransmitted));
+
+      // Update statistics table and chart
+      updateStatsTable();
+      updateTransferChart();
     },
     error: function(err) {
       console.error("Error updating status:", err);
     }
   });
+}
+
+function updateStatsTable() {
+  // Sort the data
+  sortStatsData();
+
+  const tbody = $('#stats-table-body');
+  tbody.empty();
+
+  if (statsData.length === 0) {
+    tbody.append('<tr><td colspan="7" class="text-center">No client data available</td></tr>');
+    return;
+  }
+
+  statsData.forEach(function(client, idx) {
+    const row = `
+      <tr ${client.connected ? 'class="table-success"' : ''}>
+        <td>${idx + 1}</td>
+        <td>${escapeHtml(client.name)}</td>
+        <td>${escapeHtml(client.email)}</td>
+        <td title="${client.received} Bytes">${bytesToHumanReadable(client.received)}</td>
+        <td title="${client.transmitted} Bytes">${bytesToHumanReadable(client.transmitted)}</td>
+        <td title="${client.total} Bytes"><strong>${bytesToHumanReadable(client.total)}</strong></td>
+        <td>${client.connected ? '✓' : ''}</td>
+      </tr>
+    `;
+    tbody.append(row);
+  });
+}
+
+function sortStatsTable(column) {
+  if (sortColumn === column) {
+    sortAscending = !sortAscending;
+  } else {
+    sortColumn = column;
+    sortAscending = false; // Default to descending for new column
+  }
+  updateStatsTable();
+}
+
+function sortStatsData() {
+  statsData.sort(function(a, b) {
+    let valA, valB;
+    switch(sortColumn) {
+      case 0: // Index
+        valA = a.index;
+        valB = b.index;
+        break;
+      case 1: // Name
+        valA = a.name.toLowerCase();
+        valB = b.name.toLowerCase();
+        break;
+      case 2: // Email
+        valA = a.email.toLowerCase();
+        valB = b.email.toLowerCase();
+        break;
+      case 3: // Received
+        valA = a.received;
+        valB = b.received;
+        break;
+      case 4: // Transmitted
+        valA = a.transmitted;
+        valB = b.transmitted;
+        break;
+      case 5: // Total
+        valA = a.total;
+        valB = b.total;
+        break;
+      case 6: // Connected
+        valA = a.connected ? 1 : 0;
+        valB = b.connected ? 1 : 0;
+        break;
+      default:
+        return 0;
+    }
+    
+    if (valA < valB) return sortAscending ? -1 : 1;
+    if (valA > valB) return sortAscending ? 1 : -1;
+    return 0;
+  });
+}
+
+function updateTransferChart() {
+  // Prepare data for the chart - show top 10 clients by total transfer
+  const sortedData = [...statsData].sort((a, b) => b.total - a.total).slice(0, 10);
+  
+  const labels = sortedData.map(c => c.name);
+  const receivedData = sortedData.map(c => (c.received / 1024 / 1024).toFixed(2)); // Convert to MB
+  const transmittedData = sortedData.map(c => (c.transmitted / 1024 / 1024).toFixed(2)); // Convert to MB
+
+  // Destroy existing chart if it exists
+  if (transferChart) {
+    transferChart.destroy();
+  }
+
+  // Create new chart
+  const ctx = document.getElementById('transfer-chart').getContext('2d');
+  transferChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Received (MB)',
+          data: receivedData,
+          backgroundColor: '#4e73df',
+          borderColor: '#2e59d9',
+          borderWidth: 1
+        },
+        {
+          label: 'Transmitted (MB)',
+          data: transmittedData,
+          backgroundColor: '#1cc88a',
+          borderColor: '#17a673',
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Data Transfer (MB)'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Clients'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top'
+        },
+        title: {
+          display: true,
+          text: 'Top 10 Clients by Data Transfer'
+        }
+      }
+    }
+  });
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 </script>
 
@@ -74,11 +296,85 @@ VPN Connected Users (Peers)
         {{ if .error }}
         <div class="alert alert-warning" role="alert">{{.error}}</div>
         {{ end }}
+        
+        <!-- Statistics Cards -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Total Clients</div>
+                    <div class="stat-number" id="stat_total_clients">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Connected Clients</div>
+                    <div class="stat-number" id="stat_connected_clients">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Total Received</div>
+                    <div class="stat-number" id="stat_total_received">0 B</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">Total Transmitted</div>
+                    <div class="stat-number" id="stat_total_transmitted">0 B</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Transfer Chart -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Client Data Transfer</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="transfer-chart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Table by Data Volume -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Client Statistics by Data Volume</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered table-hover" id="stats-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style="cursor: pointer;" onclick="sortStatsTable(0)"># <i class="fas fa-sort"></i></th>
+                                        <th scope="col" style="cursor: pointer;" onclick="sortStatsTable(1)">Name <i class="fas fa-sort"></i></th>
+                                        <th scope="col" style="cursor: pointer;" onclick="sortStatsTable(2)">Email <i class="fas fa-sort"></i></th>
+                                        <th scope="col" style="cursor: pointer;" onclick="sortStatsTable(3)">Received <i class="fas fa-sort"></i></th>
+                                        <th scope="col" style="cursor: pointer;" onclick="sortStatsTable(4)">Transmitted <i class="fas fa-sort"></i></th>
+                                        <th scope="col" style="cursor: pointer;" onclick="sortStatsTable(5)">Total <i class="fas fa-sort"></i></th>
+                                        <th scope="col" style="cursor: pointer;" onclick="sortStatsTable(6)">Connected <i class="fas fa-sort"></i></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stats-table-body">
+                                    <!-- Statistics rows will be appended here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="status-table-container">
             <div class="table-responsive">
                 <table class="table table-sm table-bordered table-striped">
-                    <caption>List of connected peers for device wg0</caption>
-                    <thead class="thead-dark">
+                    <caption style="caption-side: top; padding: 10px 0;">List of connected peers for device wg0</caption>
+                    <thead>
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Name</th>
@@ -103,4 +399,5 @@ VPN Connected Users (Peers)
 {{end}}
 
 {{define "bottom_js"}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 {{end}}
