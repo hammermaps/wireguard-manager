@@ -1,5 +1,5 @@
 {{define "title"}}
-API Statistics
+{{tr .t "nav.api_statistics"}}
 {{end}}
 
 {{define "top_css"}}
@@ -31,7 +31,7 @@ API Statistics
 {{end}}
 
 {{define "page_title"}}
-API Statistics
+{{tr .t "api_stats.page_title"}}
 {{end}}
 
 {{define "page_content"}}
@@ -41,25 +41,25 @@ API Statistics
         <div class="row">
             <div class="col-md-3">
                 <div class="stat-card">
-                    <h5>Total API Keys</h5>
+                    <h5>{{tr .t "api_stats.total_keys"}}</h5>
                     <div class="stat-number" id="stat_total_keys">0</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card">
-                    <h5>Active API Keys</h5>
+                    <h5>{{tr .t "api_stats.active_keys"}}</h5>
                     <div class="stat-number" id="stat_active_keys">0</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card">
-                    <h5>Total API Calls</h5>
+                    <h5>{{tr .t "api_stats.total_calls"}}</h5>
                     <div class="stat-number" id="stat_total_calls">0</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card">
-                    <h5>Calls Today</h5>
+                    <h5>{{tr .t "api_stats.calls_today"}}</h5>
                     <div class="stat-number" id="stat_calls_today">0</div>
                 </div>
             </div>
@@ -70,10 +70,10 @@ API Statistics
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Recent API Access Logs</h3>
+                        <h3 class="card-title">{{tr .t "api_stats.logs_card_title"}}</h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-sm btn-primary" onclick="loadStatistics()">
-                                <i class="fas fa-sync"></i> Refresh
+                                <i class="fas fa-sync"></i> {{tr .t "api_stats.refresh_button"}}
                             </button>
                         </div>
                     </div>
@@ -81,13 +81,13 @@ API Statistics
                         <table id="logs-table" class="table table-bordered table-striped">
                             <thead>
                                 <tr>
-                                    <th>Timestamp</th>
-                                    <th>API Key</th>
-                                    <th>Method</th>
-                                    <th>Endpoint</th>
-                                    <th>IP Address</th>
-                                    <th>User Agent</th>
-                                    <th>Status</th>
+                                    <th>{{tr .t "api_stats.table_timestamp"}}</th>
+                                    <th>{{tr .t "api_stats.table_api_key"}}</th>
+                                    <th>{{tr .t "api_stats.table_method"}}</th>
+                                    <th>{{tr .t "api_stats.table_endpoint"}}</th>
+                                    <th>{{tr .t "api_stats.table_ip_address"}}</th>
+                                    <th>{{tr .t "api_stats.table_user_agent"}}</th>
+                                    <th>{{tr .t "api_stats.table_status"}}</th>
                                 </tr>
                             </thead>
                             <tbody id="logs-list">
@@ -103,7 +103,7 @@ API Statistics
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">API Usage by Key</h3>
+                        <h3 class="card-title">{{tr .t "api_stats.usage_chart_title"}}</h3>
                     </div>
                     <div class="card-body">
                         <canvas id="usage-chart" style="height: 300px;"></canvas>
@@ -165,7 +165,7 @@ API Statistics
         tbody.empty();
 
         if (!statsData.logs || statsData.logs.length === 0) {
-            tbody.append('<tr><td colspan="7" class="text-center">No API access logs found</td></tr>');
+            tbody.append('<tr><td colspan="7" class="text-center">{{tr .t "api_stats.no_logs"}}</td></tr>');
             return;
         }
 
@@ -219,7 +219,7 @@ API Statistics
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'API Calls',
+                    label: '{{tr .t "api_stats.chart_label"}}',
                     data: data,
                     backgroundColor: '#4e73df',
                     borderColor: '#2e59d9',

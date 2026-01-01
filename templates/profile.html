@@ -1,5 +1,5 @@
 {{ define "title"}}
-My Account
+{{tr .t "nav.my_account"}}
 {{ end }}
 
 {{ define "top_css"}}
@@ -10,7 +10,7 @@ My Account
 {{ end }}
 
 {{ define "page_title"}}
-My Account
+{{tr .t "profile.page_title"}}
 {{ end }}
 
 {{ define "page_content"}}
@@ -22,25 +22,25 @@ My Account
             <div class="col-md-6">
                 <div class="card card-success">
                     <div class="card-header">
-                        <h3 class="card-title">Update user information</h3>
+                        <h3 class="card-title">{{tr .t "profile.card_title"}}</h3>
                     </div>
                     <!-- /.card-header -->
                     <!-- form start -->
                     <form role="form" id="frm_profile" name="frm_profile">
                         <div class="card-body">
                             <div class="form-group">
-                                <label for="username" class="control-label">Username</label>
+                                <label for="username" class="control-label">{{tr .t "profile.username_label"}}</label>
                                 <input type="text" class="form-control" name="username" id="username"
                                        value="">
                             </div>
                             <div class="form-group">
-                                <label for="password" class="control-label">Password</label>
+                                <label for="password" class="control-label">{{tr .t "profile.password_label"}}</label>
                                 <input type="password" class="form-control" name="password" id="password"
-                                       value="" placeholder="Leave empty to keep the password unchanged">
+                                       value="" placeholder="{{tr .t "profile.password_placeholder"}}">
                             </div>
                             <!-- /.card-body -->
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-success" id="update">Update</button>
+                                <button type="submit" class="btn btn-success" id="update">{{tr .t "profile.update_button"}}</button>
                             </div>
                         </div>
                     </form>

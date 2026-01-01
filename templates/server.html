@@ -1,5 +1,5 @@
 {{define "title"}}
-WireGuard Server
+{{tr .t "nav.wg_server"}}
 {{end}}
 
 {{define "top_css"}}
@@ -10,7 +10,7 @@ WireGuard Server
 {{end}}
 
 {{define "page_title"}}
-WireGuard Server Settings
+{{tr .t "server.page_title"}}
 {{end}}
 
 {{define "page_content"}}
@@ -22,42 +22,42 @@ WireGuard Server Settings
             <div class="col-md-6">
                 <div class="card card-success">
                     <div class="card-header">
-                        <h3 class="card-title">Interface</h3>
+                        <h3 class="card-title">{{tr .t "server.interface_card_title"}}</h3>
                     </div>
                     <!-- /.card-header -->
                     <!-- form start -->
                     <form role="form" id="frm_server_interface" name="frm_server_interface">
                         <div class="card-body">
                             <div class="form-group">
-                                <label for="addresses" class="control-label">Wireguard virtual Interface Addresses (VPN-Net)</label>
+                                <label for="addresses" class="control-label">{{tr .t "server.interface_addresses"}}</label>
                                 <input type="text" data-role="tagsinput" class="form-control" id="addresses" value="">
                             </div>
                             <div class="form-group">
-                                <label for="listen_port">Server Listen Port</label>
+                                <label for="listen_port">{{tr .t "server.listen_port"}}</label>
                                 <input type="text" class="form-control" id="listen_port" name="listen_port"
-                                    placeholder="Listen Port" value="{{ .serverInterface.ListenPort }}">
+                                    placeholder="{{tr .t "server.listen_port_placeholder"}}" value="{{ .serverInterface.ListenPort }}">
                             </div>
                             <div class="form-group">
-                                <label for="post_up">Optional: Post Up Script</label>
+                                <label for="post_up">{{tr .t "server.post_up"}}</label>
                                 <input type="text" class="form-control" id="post_up" name="post_up"
-                                       placeholder="Post Up Script" value="{{ .serverInterface.PostUp }}">
+                                       placeholder="{{tr .t "server.post_up_placeholder"}}" value="{{ .serverInterface.PostUp }}">
                             </div>
                             <div class="form-group">
-                                <label for="pre_down">Optional: Pre Down Script</label>
+                                <label for="pre_down">{{tr .t "server.pre_down"}}</label>
                                 <input type="text" class="form-control" id="pre_down" name="pre_down"
-                                       placeholder="Pre Down Script" value="{{ .serverInterface.PreDown }}">
+                                       placeholder="{{tr .t "server.pre_down_placeholder"}}" value="{{ .serverInterface.PreDown }}">
                             </div>
 
                             <div class="form-group">
-                                <label for="post_down">Optional: Post Down Script</label>
+                                <label for="post_down">{{tr .t "server.post_down"}}</label>
                                 <input type="text" class="form-control" id="post_down" name="post_down"
-                                       placeholder="Post Down Script" value="{{ .serverInterface.PostDown }}">
+                                       placeholder="{{tr .t "server.post_down_placeholder"}}" value="{{ .serverInterface.PostDown }}">
                             </div>
                         </div>
                         <!-- /.card-body -->
 
                         <div class="card-footer">
-                            <button type="submit" class="btn btn-success">Save</button>
+                            <button type="submit" class="btn btn-success">{{tr .t "server.save_button"}}</button>
                         </div>
                     </form>
                 </div>
@@ -67,26 +67,26 @@ WireGuard Server Settings
             <div class="col-md-6">
                 <div class="card card-danger">
                     <div class="card-header">
-                        <h3 class="card-title">Key Pair (Don't regenerate if server already in use!)</h3>
+                        <h3 class="card-title">{{tr .t "server.keypair_card_title"}}</h3>
                     </div>
                     <!-- /.card-header -->
                     <!-- form start -->
                     <form role="form">
                         <div class="card-body">
                             <div class="form-group">
-                                <label for="private_key">Private Key</label>
+                                <label for="private_key">{{tr .t "server.private_key"}}</label>
                                 <div class="input-group input-group">
-                                    <input type="password" class="form-control" id="private_key" placeholder="Private Key"
+                                    <input type="password" class="form-control" id="private_key" placeholder="{{tr .t "server.private_key_placeholder"}}"
                                         value="{{ .serverKeyPair.PrivateKey }}" disabled>
                                     <span class="input-group-append">
                                         <button type="button" class="btn btn-danger btn-flat"
-                                            id="btn_show_private_key">Show</button>
+                                            id="btn_show_private_key">{{tr .t "server.show_button"}}</button>
                                     </span>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="public_key">Public Key</label>
-                                <input type="text" class="form-control" id="public_key" placeholder="Public Key"
+                                <label for="public_key">{{tr .t "server.public_key"}}</label>
+                                <input type="text" class="form-control" id="public_key" placeholder="{{tr .t "server.public_key_placeholder"}}"
                                     value="{{ .serverKeyPair.PublicKey }}" disabled>
                             </div>
                         </div>
@@ -94,7 +94,7 @@ WireGuard Server Settings
 
                         <div class="card-footer">
                             <button type="button" class="btn btn-danger" data-toggle="modal"
-                                data-target="#modal_keypair_confirmation">Generate</button>
+                                data-target="#modal_keypair_confirmation">{{tr .t "server.generate_button"}}</button>
                         </div>
                     </form>
                 </div>
@@ -135,18 +135,17 @@ WireGuard Server Settings
     <div class="modal-dialog">
         <div class="modal-content bg-warning">
             <div class="modal-header">
-                <h4 class="modal-title">KeyPair Generation</h4>
+                <h4 class="modal-title">{{tr .t "server.keypair_confirmation_title"}}</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <p>Are you sure to generate a new key pair for the WireGuard server?<br/>
-                The existing Client's peer public key need to be updated to keep the connection working.</p>
+                <p>{{tr .t "server.keypair_confirmation_message"}}</p>
             </div>
             <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-outline-dark" id="btn_generate_confirm">Generate</button>
+                <button type="button" class="btn btn-outline-dark" data-dismiss="modal">{{tr .t "modal.cancel"}}</button>
+                <button type="button" class="btn btn-outline-dark" id="btn_generate_confirm">{{tr .t "server.generate_button"}}</button>
             </div>
         </div>
         <!-- /.modal-content -->
@@ -342,10 +341,10 @@ WireGuard Server Settings
                 const btnElement = document.getElementById("btn_show_private_key");
                 if (privateElement.type === 'password') {
                     privateElement.type = 'text';
-                    btnElement.innerText = 'Hide';
+                    btnElement.innerText = '{{tr .t "server.hide_button"}}';
                 } else {
                     privateElement.type = 'password';
-                    btnElement.innerText = 'Show';
+                    btnElement.innerText = '{{tr .t "server.show_button"}}';
                 }
             });
         });
@@ -365,7 +364,7 @@ WireGuard Server Settings
                     }
                 },
                 error: function() {
-                    $("#server-status-text").removeClass('badge-success badge-danger').addClass('badge-secondary').text('Unknown');
+                    $("#server-status-text").removeClass('badge-success badge-danger').addClass('badge-secondary').text('{{tr .t "server.unknown_status"}}');
                 }
             });
         }
