@@ -1,5 +1,5 @@
 {{define "title"}}
-API Key Management
+{{tr .t "nav.api_key_management"}}
 {{end}}
 
 {{define "top_css"}}
@@ -23,7 +23,7 @@ API Key Management
 {{end}}
 
 {{define "page_title"}}
-API Key Management
+{{tr .t "api_keys.page_title"}}
 {{end}}
 
 {{define "page_content"}}
@@ -33,10 +33,10 @@ API Key Management
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Manage API Keys</h3>
+                        <h3 class="card-title">{{tr .t "api_keys.card_title"}}</h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modal_new_api_key">
-                                <i class="fas fa-plus"></i> New API Key
+                                <i class="fas fa-plus"></i> {{tr .t "api_keys.new_key_button"}}
                             </button>
                         </div>
                     </div>
@@ -44,13 +44,13 @@ API Key Management
                         <table id="api-keys-table" class="table table-bordered table-striped">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Key Prefix</th>
-                                    <th>Permissions</th>
-                                    <th>Status</th>
-                                    <th>Created</th>
-                                    <th>Last Used</th>
-                                    <th>Actions</th>
+                                    <th>{{tr .t "api_keys.table_name"}}</th>
+                                    <th>{{tr .t "api_keys.table_key_prefix"}}</th>
+                                    <th>{{tr .t "api_keys.table_permissions"}}</th>
+                                    <th>{{tr .t "api_keys.table_status"}}</th>
+                                    <th>{{tr .t "api_keys.table_created"}}</th>
+                                    <th>{{tr .t "api_keys.table_last_used"}}</th>
+                                    <th>{{tr .t "api_keys.table_actions"}}</th>
                                 </tr>
                             </thead>
                             <tbody id="api-keys-list">
@@ -68,7 +68,7 @@ API Key Management
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Create New API Key</h4>
+                <h4 class="modal-title">{{tr .t "api_keys.create_title"}}</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -76,42 +76,42 @@ API Key Management
             <form id="frm_new_api_key">
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="api_key_name">Name</label>
+                        <label for="api_key_name">{{tr .t "api_keys.key_name"}}</label>
                         <input type="text" class="form-control" id="api_key_name" name="name" required>
                     </div>
                     <div class="form-group">
-                        <label>Permissions</label>
+                        <label>{{tr .t "api_keys.permissions_label"}}</label>
                         <div>
                             <div class="icheck-primary">
                                 <input type="checkbox" id="perm_read_clients" name="permissions" value="read:clients">
-                                <label for="perm_read_clients">Read Clients</label>
+                                <label for="perm_read_clients">{{tr .t "api_keys.perm_read_clients"}}</label>
                             </div>
                             <div class="icheck-primary">
                                 <input type="checkbox" id="perm_write_clients" name="permissions" value="write:clients">
-                                <label for="perm_write_clients">Write Clients</label>
+                                <label for="perm_write_clients">{{tr .t "api_keys.perm_write_clients"}}</label>
                             </div>
                             <div class="icheck-primary">
                                 <input type="checkbox" id="perm_read_server" name="permissions" value="read:server">
-                                <label for="perm_read_server">Read Server</label>
+                                <label for="perm_read_server">{{tr .t "api_keys.perm_read_server"}}</label>
                             </div>
                             <div class="icheck-primary">
                                 <input type="checkbox" id="perm_write_server" name="permissions" value="write:server">
-                                <label for="perm_write_server">Write Server</label>
+                                <label for="perm_write_server">{{tr .t "api_keys.perm_write_server"}}</label>
                             </div>
                             <div class="icheck-primary">
                                 <input type="checkbox" id="perm_manage_groups" name="permissions" value="manage:groups">
-                                <label for="perm_manage_groups">Manage Groups</label>
+                                <label for="perm_manage_groups">{{tr .t "api_keys.perm_manage_groups"}}</label>
                             </div>
                             <div class="icheck-primary">
                                 <input type="checkbox" id="perm_read_stats" name="permissions" value="read:stats">
-                                <label for="perm_read_stats">Read Statistics</label>
+                                <label for="perm_read_stats">{{tr .t "api_keys.perm_read_stats"}}</label>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer justify-content-between">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Create</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{tr .t "api_keys.cancel_button"}}</button>
+                    <button type="submit" class="btn btn-primary">{{tr .t "api_keys.create_button"}}</button>
                 </div>
             </form>
         </div>
@@ -123,7 +123,7 @@ API Key Management
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">API Key Created</h4>
+                <h4 class="modal-title">{{tr .t "api_keys.show_key_title"}}</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -131,18 +131,18 @@ API Key Management
             <div class="modal-body">
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <strong>Important:</strong> This is the only time you will see this API key. Please save it securely.
+                    {{tr .t "api_keys.show_key_warning"}}
                 </div>
                 <div class="form-group">
-                    <label>API Key:</label>
+                    <label>{{tr .t "api_keys.show_key_label"}}</label>
                     <div class="api-key-display" id="new_api_key_value"></div>
                     <button type="button" class="btn btn-sm btn-secondary" onclick="copyAPIKey()">
-                        <i class="fas fa-copy"></i> Copy to Clipboard
+                        <i class="fas fa-copy"></i> {{tr .t "api_keys.copy_button"}}
                     </button>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">{{tr .t "api_keys.close_button"}}</button>
             </div>
         </div>
     </div>
@@ -153,7 +153,7 @@ API Key Management
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Edit API Key</h4>
+                <h4 class="modal-title">{{tr .t "api_keys.edit_title"}}</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -162,48 +162,48 @@ API Key Management
                 <input type="hidden" id="edit_api_key_id" name="id">
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="edit_api_key_name">Name</label>
+                        <label for="edit_api_key_name">{{tr .t "api_keys.key_name"}}</label>
                         <input type="text" class="form-control" id="edit_api_key_name" name="name" required>
                     </div>
                     <div class="form-group">
                         <div class="icheck-primary">
                             <input type="checkbox" id="edit_enabled">
-                            <label for="edit_enabled">Enabled</label>
+                            <label for="edit_enabled">{{tr .t "api_keys.edit_enabled"}}</label>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Permissions</label>
+                        <label>{{tr .t "api_keys.permissions_label"}}</label>
                         <div id="edit_permissions">
                             <div class="icheck-primary">
                                 <input type="checkbox" id="edit_perm_read_clients" name="permissions" value="read:clients">
-                                <label for="edit_perm_read_clients">Read Clients</label>
+                                <label for="edit_perm_read_clients">{{tr .t "api_keys.perm_read_clients"}}</label>
                             </div>
                             <div class="icheck-primary">
                                 <input type="checkbox" id="edit_perm_write_clients" name="permissions" value="write:clients">
-                                <label for="edit_perm_write_clients">Write Clients</label>
+                                <label for="edit_perm_write_clients">{{tr .t "api_keys.perm_write_clients"}}</label>
                             </div>
                             <div class="icheck-primary">
                                 <input type="checkbox" id="edit_perm_read_server" name="permissions" value="read:server">
-                                <label for="edit_perm_read_server">Read Server</label>
+                                <label for="edit_perm_read_server">{{tr .t "api_keys.perm_read_server"}}</label>
                             </div>
                             <div class="icheck-primary">
                                 <input type="checkbox" id="edit_perm_write_server" name="permissions" value="write:server">
-                                <label for="edit_perm_write_server">Write Server</label>
+                                <label for="edit_perm_write_server">{{tr .t "api_keys.perm_write_server"}}</label>
                             </div>
                             <div class="icheck-primary">
                                 <input type="checkbox" id="edit_perm_manage_groups" name="permissions" value="manage:groups">
-                                <label for="edit_perm_manage_groups">Manage Groups</label>
+                                <label for="edit_perm_manage_groups">{{tr .t "api_keys.perm_manage_groups"}}</label>
                             </div>
                             <div class="icheck-primary">
                                 <input type="checkbox" id="edit_perm_read_stats" name="permissions" value="read:stats">
-                                <label for="edit_perm_read_stats">Read Statistics</label>
+                                <label for="edit_perm_read_stats">{{tr .t "api_keys.perm_read_stats"}}</label>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer justify-content-between">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{tr .t "api_keys.cancel_button"}}</button>
+                    <button type="submit" class="btn btn-primary">{{tr .t "api_keys.update_button"}}</button>
                 </div>
             </form>
         </div>
@@ -235,7 +235,7 @@ API Key Management
         tbody.empty();
 
         if (apiKeysData.length === 0) {
-            tbody.append('<tr><td colspan="7" class="text-center">No API keys found</td></tr>');
+            tbody.append('<tr><td colspan="7" class="text-center">{{tr .t "api_keys.no_keys"}}</td></tr>');
             return;
         }
 
@@ -245,12 +245,12 @@ API Key Management
             ).join('');
             
             const status = key.enabled 
-                ? '<span class="badge badge-success">Enabled</span>' 
-                : '<span class="badge badge-danger">Disabled</span>';
+                ? '<span class="badge badge-success">{{tr .t "api_keys.status_enabled"}}</span>' 
+                : '<span class="badge badge-danger">{{tr .t "api_keys.status_disabled"}}</span>';
             
             const lastUsed = key.last_used_at 
                 ? new Date(key.last_used_at).toLocaleString() 
-                : 'Never';
+                : '{{tr .t "api_keys.last_used_never"}}';
             
             const row = `
                 <tr>
@@ -371,7 +371,7 @@ API Key Management
     });
 
     function deleteAPIKey(id, name) {
-        if (!confirm(`Are you sure you want to delete API key "${name}"?`)) {
+        if (!confirm(`{{tr .t "api_keys.delete_confirm"}} "${name}"?`)) {
             return;
         }
 

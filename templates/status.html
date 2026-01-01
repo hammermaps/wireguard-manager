@@ -1,5 +1,5 @@
 {{define "title"}}
-VPN Connected Users (Peers)
+{{tr .t "page.vpn_status_title"}}
 {{end}}
 
 {{define "top_css"}}
@@ -35,7 +35,7 @@ VPN Connected Users (Peers)
 {{end}}
 
 {{define "page_title"}}
-VPN Connected Users (Peers)
+{{tr .t "page.vpn_status_title"}}
 {{end}}
 
 {{define "page_content"}}
@@ -138,7 +138,7 @@ function updateStatsTable() {
   tbody.empty();
 
   if (statsData.length === 0) {
-    tbody.append('<tr><td colspan="7" class="text-center">No client data available</td></tr>');
+    tbody.append('<tr><td colspan="7" class="text-center">{{tr .t "status_page.no_data"}}</td></tr>');
     return;
   }
 
@@ -232,14 +232,14 @@ function updateTransferChart() {
       labels: labels,
       datasets: [
         {
-          label: 'Received (MB)',
+          label: '{{tr .t "status_page.received_mb"}}',
           data: receivedData,
           backgroundColor: '#4e73df',
           borderColor: '#2e59d9',
           borderWidth: 1
         },
         {
-          label: 'Transmitted (MB)',
+          label: '{{tr .t "status_page.transmitted_mb"}}',
           data: transmittedData,
           backgroundColor: '#1cc88a',
           borderColor: '#17a673',
@@ -255,13 +255,13 @@ function updateTransferChart() {
           beginAtZero: true,
           title: {
             display: true,
-            text: 'Data Transfer (MB)'
+            text: '{{tr .t "status_page.data_transfer_mb"}}'
           }
         },
         x: {
           title: {
             display: true,
-            text: 'Clients'
+            text: '{{tr .t "status_page.clients_label"}}'
           }
         }
       },
@@ -272,7 +272,7 @@ function updateTransferChart() {
         },
         title: {
           display: true,
-          text: 'Top 10 Clients by Data Transfer'
+          text: '{{tr .t "status_page.top_clients_chart"}}'
         }
       }
     }
@@ -302,25 +302,25 @@ function escapeHtml(text) {
         <div class="row">
             <div class="col-md-3">
                 <div class="stat-card">
-                    <div class="stat-label">Total Clients</div>
+                    <div class="stat-label">{{tr .t "status_page.stat_total_clients"}}</div>
                     <div class="stat-number" id="stat_total_clients">0</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card">
-                    <div class="stat-label">Connected Clients</div>
+                    <div class="stat-label">{{tr .t "status_page.stat_connected_clients"}}</div>
                     <div class="stat-number" id="stat_connected_clients">0</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card">
-                    <div class="stat-label">Total Received</div>
+                    <div class="stat-label">{{tr .t "status_page.stat_total_received"}}</div>
                     <div class="stat-number" id="stat_total_received">0 B</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stat-card">
-                    <div class="stat-label">Total Transmitted</div>
+                    <div class="stat-label">{{tr .t "status_page.stat_total_transmitted"}}</div>
                     <div class="stat-number" id="stat_total_transmitted">0 B</div>
                 </div>
             </div>
@@ -331,7 +331,7 @@ function escapeHtml(text) {
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Client Data Transfer</h3>
+                        <h3 class="card-title">{{tr .t "status_page.client_data_transfer"}}</h3>
                     </div>
                     <div class="card-body">
                         <canvas id="transfer-chart" style="height: 300px;"></canvas>
@@ -345,20 +345,20 @@ function escapeHtml(text) {
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Client Statistics by Data Volume</h3>
+                        <h3 class="card-title">{{tr .t "status_page.client_statistics_title"}}</h3>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered table-hover" id="stats-table">
                                 <thead>
                                     <tr>
-                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(0)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(0)"># <i class="fas fa-sort"></i></th>
-                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(1)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(1)">Name <i class="fas fa-sort"></i></th>
-                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(2)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(2)">Email <i class="fas fa-sort"></i></th>
-                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(3)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(3)">Received <i class="fas fa-sort"></i></th>
-                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(4)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(4)">Transmitted <i class="fas fa-sort"></i></th>
-                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(5)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(5)">Total <i class="fas fa-sort"></i></th>
-                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(6)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(6)">Connected <i class="fas fa-sort"></i></th>
+                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(0)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(0)">{{tr .t "status_page.table_number"}} <i class="fas fa-sort"></i></th>
+                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(1)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(1)">{{tr .t "status_page.table_name"}} <i class="fas fa-sort"></i></th>
+                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(2)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(2)">{{tr .t "status_page.table_email"}} <i class="fas fa-sort"></i></th>
+                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(3)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(3)">{{tr .t "status_page.table_received"}} <i class="fas fa-sort"></i></th>
+                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(4)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(4)">{{tr .t "status_page.table_transmitted"}} <i class="fas fa-sort"></i></th>
+                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(5)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(5)">{{tr .t "status_page.table_total"}} <i class="fas fa-sort"></i></th>
+                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(6)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(6)">{{tr .t "status_page.table_connected"}} <i class="fas fa-sort"></i></th>
                                     </tr>
                                 </thead>
                                 <tbody id="stats-table-body">
@@ -374,19 +374,19 @@ function escapeHtml(text) {
         <div id="status-table-container">
             <div class="table-responsive">
                 <table class="table table-sm table-bordered table-striped">
-                    <caption style="caption-side: top; padding: 10px 0;">List of connected peers for device wg0</caption>
+                    <caption style="caption-side: top; padding: 10px 0;">{{tr .t "status_page.table_caption"}}</caption>
                     <thead>
                         <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Email</th>
-                            <th scope="col">Allocated IPs</th>
-                            <th scope="col">Endpoint</th>
-                            <th scope="col">Public Key</th>
-                            <th scope="col">Received</th>
-                            <th scope="col">Transmitted</th>
-                            <th scope="col">Connected</th>
-                            <th scope="col">Last Handshake</th>
+                            <th scope="col">{{tr .t "status_page.table_number"}}</th>
+                            <th scope="col">{{tr .t "status_page.table_name"}}</th>
+                            <th scope="col">{{tr .t "status_page.table_email"}}</th>
+                            <th scope="col">{{tr .t "status_page.table_allocated_ips"}}</th>
+                            <th scope="col">{{tr .t "status_page.table_endpoint"}}</th>
+                            <th scope="col">{{tr .t "status_page.table_public_key"}}</th>
+                            <th scope="col">{{tr .t "status_page.table_received"}}</th>
+                            <th scope="col">{{tr .t "status_page.table_transmitted"}}</th>
+                            <th scope="col">{{tr .t "status_page.table_connected"}}</th>
+                            <th scope="col">{{tr .t "status_page.table_last_handshake"}}</th>
                         </tr>
                     </thead>
                     <tbody>
