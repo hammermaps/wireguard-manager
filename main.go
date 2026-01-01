@@ -312,15 +312,13 @@ func main() {
 		handler.ValidSession, handler.ContentTypeJson)
 
 	// API Key Management routes (admin only)
-	if !util.DisableLogin {
-		app.GET(util.BasePath+"/api-keys", handler.APIKeyManagementPage(db), handler.ValidSession, handler.RefreshSession, handler.NeedsAdmin)
-		app.GET(util.BasePath+"/api-statistics", handler.APIStatisticsPage(db), handler.ValidSession, handler.RefreshSession, handler.NeedsAdmin)
-		app.GET(util.BasePath+"/api/api-keys", handler.GetAPIKeys(db), handler.ValidSession, handler.NeedsAdmin)
-		app.POST(util.BasePath+"/api/api-keys", handler.CreateAPIKey(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
-		app.PUT(util.BasePath+"/api/api-keys", handler.UpdateAPIKey(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
-		app.DELETE(util.BasePath+"/api/api-keys", handler.DeleteAPIKey(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
-		app.GET(util.BasePath+"/api/api-statistics", handler.GetAPIStatistics(db), handler.ValidSession, handler.NeedsAdmin)
-	}
+	app.GET(util.BasePath+"/api-keys", handler.APIKeyManagementPage(db), handler.ValidSession, handler.RefreshSession, handler.NeedsAdmin)
+	app.GET(util.BasePath+"/api-statistics", handler.APIStatisticsPage(db), handler.ValidSession, handler.RefreshSession, handler.NeedsAdmin)
+	app.GET(util.BasePath+"/api/api-keys", handler.GetAPIKeys(db), handler.ValidSession, handler.NeedsAdmin)
+	app.POST(util.BasePath+"/api/api-keys", handler.CreateAPIKey(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
+	app.PUT(util.BasePath+"/api/api-keys", handler.UpdateAPIKey(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
+	app.DELETE(util.BasePath+"/api/api-keys", handler.DeleteAPIKey(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
+	app.GET(util.BasePath+"/api/api-statistics", handler.GetAPIStatistics(db), handler.ValidSession, handler.NeedsAdmin)
 
 	// Group management routes
 	app.POST(util.BasePath+"/api/group/set-status", handler.SetGroupStatus(db), handler.ValidSession, handler.ContentTypeJson)
