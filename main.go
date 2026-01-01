@@ -234,6 +234,9 @@ func main() {
 	// Initialize the Echo router using our optimized router.New.
 	app := router.New(tmplDir, extraData, util.SessionSecret)
 
+	// Add security middleware (should be early in the chain)
+	app.Use(handler.SecurityMiddleware(db))
+
 	// Additional middleware: Clear invalid session cookies from both response and request.
 	app.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -329,6 +332,24 @@ func main() {
 	app.PUT(util.BasePath+"/api/api-keys", handler.UpdateAPIKey(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
 	app.DELETE(util.BasePath+"/api/api-keys", handler.DeleteAPIKey(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
 	app.GET(util.BasePath+"/api/api-statistics", handler.GetAPIStatistics(db), handler.ValidSession, handler.NeedsAdmin)
+
+	// Security Management routes (admin only)
+	app.GET(util.BasePath+"/security-settings", handler.SecuritySettingsPage(), handler.ValidSession, handler.RefreshSession, handler.NeedsAdmin)
+	app.GET(util.BasePath+"/security-statistics", handler.SecurityStatisticsPage(), handler.ValidSession, handler.RefreshSession, handler.NeedsAdmin)
+	app.GET(util.BasePath+"/api/security/settings", handler.GetSecuritySettings(db), handler.ValidSession, handler.NeedsAdmin)
+	app.POST(util.BasePath+"/api/security/settings", handler.UpdateSecuritySettings(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
+	app.GET(util.BasePath+"/api/security/events", handler.GetSecurityEvents(db), handler.ValidSession, handler.NeedsAdmin)
+	app.GET(util.BasePath+"/api/security/statistics", handler.GetSecurityStatistics(db), handler.ValidSession, handler.NeedsAdmin)
+	
+	// IP Blocking routes (admin only)
+	app.GET(util.BasePath+"/api/security/ip-blocks", handler.GetIPBlocks(db), handler.ValidSession, handler.NeedsAdmin)
+	app.POST(util.BasePath+"/api/security/ip-blocks", handler.CreateIPBlock(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
+	app.DELETE(util.BasePath+"/api/security/ip-blocks", handler.DeleteIPBlock(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
+	
+	// GeoIP Blocking routes (admin only)
+	app.GET(util.BasePath+"/api/security/geoip-rules", handler.GetGeoIPRules(db), handler.ValidSession, handler.NeedsAdmin)
+	app.POST(util.BasePath+"/api/security/geoip-rules", handler.CreateGeoIPRule(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
+	app.DELETE(util.BasePath+"/api/security/geoip-rules", handler.DeleteGeoIPRule(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
 
 	// Group management routes
 	app.POST(util.BasePath+"/api/group/set-status", handler.SetGroupStatus(db), handler.ValidSession, handler.ContentTypeJson)

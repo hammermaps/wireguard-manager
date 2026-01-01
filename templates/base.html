@@ -375,6 +375,7 @@
                         </li>
                         {{end}}
                         <li class="nav-header">{{tr .t "nav.api"}}</li>
+                        {{if .baseData.Admin}}
                         <li class="nav-item">
                             <a href="{{.basePath}}/api-keys" class="nav-link {{if eq .baseData.Active "api-keys" }}active{{end}}">
                                 <i class="nav-icon fas fa-key"></i>
@@ -385,6 +386,21 @@
                             <a href="{{.basePath}}/api-statistics" class="nav-link {{if eq .baseData.Active "api-statistics" }}active{{end}}">
                                 <i class="nav-icon fas fa-chart-bar"></i>
                                 <p>{{tr .t "nav.api_statistics"}}</p>
+                            </a>
+                        </li>
+                        {{end}}
+                        <li class="nav-header">{{tr .t "nav.security"}}</li>
+                        {{if .baseData.Admin}}
+                        <li class="nav-item">
+                            <a href="{{.basePath}}/security-settings" class="nav-link {{if eq .baseData.Active "security-settings" }}active{{end}}">
+                                <i class="nav-icon fas fa-shield-alt"></i>
+                                <p>{{tr .t "nav.security_settings"}}</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{.basePath}}/security-statistics" class="nav-link {{if eq .baseData.Active "security-statistics" }}active{{end}}">
+                                <i class="nav-icon fas fa-exclamation-triangle"></i>
+                                <p>{{tr .t "nav.security_statistics"}}</p>
                             </a>
                         </li>
                         {{end}}

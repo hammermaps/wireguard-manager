@@ -584,3 +584,253 @@ func (o *JsonDB) GetAPIAccessLogsByKeyID(keyID string, limit int) ([]model.APIAc
 	
 	return logs, nil
 }
+
+// Security Management
+
+func (o *JsonDB) GetSecuritySettings() (model.SecuritySettings, error) {
+settings := model.SecuritySettings{}
+settingsPath := path.Join(o.dbPath, "server", "security_settings.json")
+
+if _, err := os.Stat(settingsPath); os.IsNotExist(err) {
+// Return default settings if file doesn't exist
+settings = model.DefaultSecuritySettings()
+// Save default settings
+if err := o.SaveSecuritySettings(settings); err != nil {
+return settings, err
+}
+return settings, nil
+}
+
+if err := o.conn.Read("server", "security_settings", &settings); err != nil {
+return model.SecuritySettings{}, err
+}
+return settings, nil
+}
+
+func (o *JsonDB) SaveSecuritySettings(settings model.SecuritySettings) error {
+return o.conn.Write("server", "security_settings", settings)
+}
+
+// Security Events
+
+func (o *JsonDB) SaveSecurityEvent(event model.SecurityEvent) error {
+return o.conn.Write("security_events", event.ID, event)
+}
+
+func (o *JsonDB) GetSecurityEvents(limit int) ([]model.SecurityEvent, error) {
+var events []model.SecurityEvent
+records, err := o.conn.ReadAll("security_events")
+if err != nil {
+// Return empty slice if collection doesn't exist
+return events, nil
+}
+
+for _, r := range records {
+var event model.SecurityEvent
+if err := json.Unmarshal([]byte(r), &event); err != nil {
+return events, err
+}
+events = append(events, event)
+}
+
+// Sort by created date descending
+sort.Slice(events, func(i, j int) bool {
+return events[i].CreatedAt.After(events[j].CreatedAt)
+})
+
+// Limit results
+if limit > 0 && len(events) > limit {
+events = events[:limit]
+}
+
+return events, nil
+}
+
+func (o *JsonDB) GetSecurityEventsByType(eventType string, limit int) ([]model.SecurityEvent, error) {
+allEvents, err := o.GetSecurityEvents(0)
+if err != nil {
+return nil, err
+}
+
+var filteredEvents []model.SecurityEvent
+for _, event := range allEvents {
+if event.EventType == eventType {
+filteredEvents = append(filteredEvents, event)
+}
+}
+
+// Limit results
+if limit > 0 && len(filteredEvents) > limit {
+filteredEvents = filteredEvents[:limit]
+}
+
+return filteredEvents, nil
+}
+
+// IP Blocking
+
+func (o *JsonDB) GetIPBlocks() ([]model.IPBlock, error) {
+var blocks []model.IPBlock
+records, err := o.conn.ReadAll("ip_blocks")
+if err != nil {
+// Return empty slice if collection doesn't exist
+return blocks, nil
+}
+
+for _, r := range records {
+var block model.IPBlock
+if err := json.Unmarshal([]byte(r), &block); err != nil {
+return blocks, err
+}
+
+// Check if temporary block has expired
+if !block.Permanent && !block.ExpiresAt.IsZero() && time.Now().UTC().After(block.ExpiresAt) {
+// Skip expired blocks
+continue
+}
+
+blocks = append(blocks, block)
+}
+
+// Sort by created date descending
+sort.Slice(blocks, func(i, j int) bool {
+return blocks[i].CreatedAt.After(blocks[j].CreatedAt)
+})
+
+return blocks, nil
+}
+
+func (o *JsonDB) GetIPBlockByIP(ip string) (model.IPBlock, error) {
+blocks, err := o.GetIPBlocks()
+if err != nil {
+return model.IPBlock{}, err
+}
+
+for _, block := range blocks {
+if block.IP == ip {
+return block, nil
+}
+}
+
+return model.IPBlock{}, fmt.Errorf("IP block not found")
+}
+
+func (o *JsonDB) SaveIPBlock(block model.IPBlock) error {
+return o.conn.Write("ip_blocks", block.ID, block)
+}
+
+func (o *JsonDB) DeleteIPBlock(id string) error {
+return o.conn.Delete("ip_blocks", id)
+}
+
+func (o *JsonDB) IsIPBlocked(ip string) (bool, error) {
+blocks, err := o.GetIPBlocks()
+if err != nil {
+return false, err
+}
+
+for _, block := range blocks {
+if block.IP == ip {
+// Check if permanent or not expired
+if block.Permanent {
+return true, nil
+}
+if !block.ExpiresAt.IsZero() && time.Now().UTC().Before(block.ExpiresAt) {
+return true, nil
+}
+}
+}
+
+return false, nil
+}
+
+// GeoIP Rules
+
+func (o *JsonDB) GetGeoIPRules() ([]model.GeoIPRule, error) {
+var rules []model.GeoIPRule
+records, err := o.conn.ReadAll("geoip_rules")
+if err != nil {
+// Return empty slice if collection doesn't exist
+return rules, nil
+}
+
+for _, r := range records {
+var rule model.GeoIPRule
+if err := json.Unmarshal([]byte(r), &rule); err != nil {
+return rules, err
+}
+rules = append(rules, rule)
+}
+
+// Sort by country code
+sort.Slice(rules, func(i, j int) bool {
+return rules[i].CountryCode < rules[j].CountryCode
+})
+
+return rules, nil
+}
+
+func (o *JsonDB) GetGeoIPRuleByCountry(countryCode string) (model.GeoIPRule, error) {
+rules, err := o.GetGeoIPRules()
+if err != nil {
+return model.GeoIPRule{}, err
+}
+
+for _, rule := range rules {
+if rule.CountryCode == countryCode {
+return rule, nil
+}
+}
+
+return model.GeoIPRule{}, fmt.Errorf("GeoIP rule not found")
+}
+
+func (o *JsonDB) SaveGeoIPRule(rule model.GeoIPRule) error {
+return o.conn.Write("geoip_rules", rule.ID, rule)
+}
+
+func (o *JsonDB) DeleteGeoIPRule(id string) error {
+return o.conn.Delete("geoip_rules", id)
+}
+
+// Brute Force Protection
+
+func (o *JsonDB) GetBruteForceAttempt(ip string) (model.BruteForceAttempt, error) {
+var attempt model.BruteForceAttempt
+err := o.conn.Read("brute_force_attempts", ip, &attempt)
+if err != nil {
+return model.BruteForceAttempt{}, err
+}
+return attempt, nil
+}
+
+func (o *JsonDB) SaveBruteForceAttempt(attempt model.BruteForceAttempt) error {
+return o.conn.Write("brute_force_attempts", attempt.IP, attempt)
+}
+
+func (o *JsonDB) DeleteBruteForceAttempt(ip string) error {
+return o.conn.Delete("brute_force_attempts", ip)
+}
+
+func (o *JsonDB) CleanupExpiredBruteForceAttempts() error {
+records, err := o.conn.ReadAll("brute_force_attempts")
+if err != nil {
+// Return nil if collection doesn't exist
+return nil
+}
+
+now := time.Now().UTC()
+for _, r := range records {
+var attempt model.BruteForceAttempt
+if err := json.Unmarshal([]byte(r), &attempt); err != nil {
+continue
+}
+
+// Delete if block has expired
+if !attempt.BlockedUntil.IsZero() && now.After(attempt.BlockedUntil) {
+o.conn.Delete("brute_force_attempts", attempt.IP)
+}
+}
+
+return nil
+}
