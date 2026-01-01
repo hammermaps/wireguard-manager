@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/labstack/gommon/log"
@@ -12,11 +13,21 @@ import (
 // GetWireGuardInterface extracts the interface name from the config file path
 // e.g., "/etc/wireguard/wg0.conf" -> "wg0"
 func GetWireGuardInterface(configPath string) string {
-	// Extract filename from path
-	parts := strings.Split(configPath, "/")
-	filename := parts[len(parts)-1]
+	if configPath == "" {
+		log.Warn("Empty config path provided to GetWireGuardInterface, using default 'wg0'")
+		return "wg0"
+	}
+	
+	// Extract filename from path using filepath.Base
+	filename := filepath.Base(configPath)
 	// Remove .conf extension
 	interfaceName := strings.TrimSuffix(filename, ".conf")
+	
+	if interfaceName == "" {
+		log.Warn("Could not extract interface name from config path, using default 'wg0'")
+		return "wg0"
+	}
+	
 	return interfaceName
 }
 
