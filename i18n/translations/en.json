@@ -16,7 +16,9 @@
     "wgm_user_accounts": "WGM User Accounts",
     "api": "API",
     "api_key_management": "API Key Management",
-    "api_statistics": "API Statistics"
+    "api_statistics": "API Statistics",
+    "theme_light": "Light",
+    "theme_dark": "Dark"
   },
   "status": {
     "all": "All",
