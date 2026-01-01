@@ -28,11 +28,20 @@
   "modal": {
     "new_client_title": "Neuer WireGuard-Client",
     "apply_config_title": "Konfiguration anwenden",
-    "apply_config_message": "Möchten Sie die Konfigurationsdatei schreiben und den WireGuard-Server neu starten?",
+    "apply_config_message": "Möchten Sie die Konfigurationsdatei schreiben und per Reload (wg syncconf) übernehmen?",
     "email_config_title": "E-Mail-Konfiguration",
     "cancel": "Abbrechen",
     "submit": "Absenden",
-    "apply": "Anwenden"
+    "apply": "Anwenden",
+    "server_start_title": "Server starten",
+    "server_start_message": "Möchten Sie den WireGuard-Server starten?",
+    "server_stop_title": "Server stoppen",
+    "server_stop_message": "Möchten Sie den WireGuard-Server stoppen?",
+    "server_restart_title": "Server neustarten",
+    "server_restart_message": "Möchten Sie den WireGuard-Server neustarten?",
+    "start": "Starten",
+    "stop": "Stoppen",
+    "restart": "Neustarten"
   },
   "form": {
     "name": "Name",
@@ -78,6 +87,21 @@
     "error_loading": "Fehler beim Laden der Client-Daten.",
     "error_suggesting": "Fehler beim Vorschlagen der IP-Zuweisung.",
     "config_check_error": "Fehler beim Überprüfen der Konfigurationsänderungen.",
-    "please_enter_name": "Bitte geben Sie einen Namen ein"
+    "please_enter_name": "Bitte geben Sie einen Namen ein",
+    "server_started_successfully": "WireGuard-Server erfolgreich gestartet",
+    "server_stopped_successfully": "WireGuard-Server erfolgreich gestoppt",
+    "server_restarted_successfully": "WireGuard-Server erfolgreich neugestartet",
+    "error_starting_server": "Fehler beim Starten des Servers.",
+    "error_stopping_server": "Fehler beim Stoppen des Servers.",
+    "error_restarting_server": "Fehler beim Neustarten des Servers."
+  },
+  "server": {
+    "control": "Server-Steuerung",
+    "start_button": "Server starten",
+    "stop_button": "Server stoppen",
+    "restart_button": "Server neustarten",
+    "status": "Status",
+    "running": "Läuft",
+    "stopped": "Gestoppt"
   }
 }

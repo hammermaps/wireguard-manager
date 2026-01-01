@@ -1094,7 +1094,7 @@ func SuggestIPAllocation(db store.IStore) echo.HandlerFunc {
 	}
 }
 
-// ApplyServerConfig handler writes the config file and restarts the WireGuard server.
+// ApplyServerConfig handler writes the config file and reloads the WireGuard server using wg syncconf.
 func ApplyServerConfig(db store.IStore, tmplDir fs.FS) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		server, err := db.GetServer()
@@ -1122,11 +1122,18 @@ func ApplyServerConfig(db store.IStore, tmplDir fs.FS) echo.HandlerFunc {
 			log.Error("Cannot apply server config: ", err)
 			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: fmt.Sprintf("Cannot apply server config: %v", err)})
 		}
+		
+		// Reload WireGuard using wg syncconf instead of full restart
+		if err := util.ReloadWireGuard(settings); err != nil {
+			log.Error("Cannot reload WireGuard: ", err)
+			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: fmt.Sprintf("Config written but failed to reload WireGuard: %v", err)})
+		}
+		
 		if err := util.UpdateHashes(db); err != nil {
 			log.Error("Cannot update hashes: ", err)
 			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: fmt.Sprintf("Cannot update hashes: %v", err)})
 		}
-		return c.JSON(http.StatusOK, jsonHTTPResponse{Success: true, Message: "Applied server config successfully"})
+		return c.JSON(http.StatusOK, jsonHTTPResponse{Success: true, Message: "Applied config and reloaded WireGuard successfully"})
 	}
 }
 
@@ -1138,5 +1145,83 @@ func GetHashesChanges(db store.IStore) echo.HandlerFunc {
 			return c.JSON(http.StatusOK, jsonHTTPResponse{Success: true, Message: "Hashes changed"})
 		}
 		return c.JSON(http.StatusOK, jsonHTTPResponse{Success: false, Message: "Hashes not changed"})
+	}
+}
+
+// StartWireGuardServer starts the WireGuard server interface
+func StartWireGuardServer(db store.IStore) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		settings, err := db.GetGlobalSettings()
+		if err != nil {
+			log.Error("Cannot get global settings: ", err)
+			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: "Cannot get global settings"})
+		}
+
+		if err := util.StartWireGuard(settings); err != nil {
+			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: fmt.Sprintf("Failed to start WireGuard: %v", err)})
+		}
+
+		return c.JSON(http.StatusOK, jsonHTTPResponse{Success: true, Message: "WireGuard server started successfully"})
+	}
+}
+
+// StopWireGuardServer stops the WireGuard server interface
+func StopWireGuardServer(db store.IStore) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		settings, err := db.GetGlobalSettings()
+		if err != nil {
+			log.Error("Cannot get global settings: ", err)
+			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: "Cannot get global settings"})
+		}
+
+		if err := util.StopWireGuard(settings); err != nil {
+			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: fmt.Sprintf("Failed to stop WireGuard: %v", err)})
+		}
+
+		return c.JSON(http.StatusOK, jsonHTTPResponse{Success: true, Message: "WireGuard server stopped successfully"})
+	}
+}
+
+// RestartWireGuardServer restarts the WireGuard server interface
+func RestartWireGuardServer(db store.IStore) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		settings, err := db.GetGlobalSettings()
+		if err != nil {
+			log.Error("Cannot get global settings: ", err)
+			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: "Cannot get global settings"})
+		}
+
+		if err := util.RestartWireGuard(settings); err != nil {
+			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: fmt.Sprintf("Failed to restart WireGuard: %v", err)})
+		}
+
+		return c.JSON(http.StatusOK, jsonHTTPResponse{Success: true, Message: "WireGuard server restarted successfully"})
+	}
+}
+
+// GetWireGuardStatus returns the status of the WireGuard interface
+func GetWireGuardStatus(db store.IStore) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		settings, err := db.GetGlobalSettings()
+		if err != nil {
+			log.Error("Cannot get global settings: ", err)
+			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: "Cannot get global settings"})
+		}
+
+		isRunning, err := util.GetWireGuardStatus(settings)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: fmt.Sprintf("Failed to get WireGuard status: %v", err)})
+		}
+
+		status := "stopped"
+		if isRunning {
+			status = "running"
+		}
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"success": true,
+			"status":  status,
+			"running": isRunning,
+		})
 	}
 }
