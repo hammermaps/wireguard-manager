@@ -137,6 +137,14 @@ func New(tmplDir fs.FS, extraData map[string]interface{}, secret [64]byte) *echo
 	if err != nil {
 		log.Fatal(err)
 	}
+	tmplAPIKeysString, err := util.StringFromEmbedFile(tmplDir, "api_keys.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	tmplAPIStatisticsString, err := util.StringFromEmbedFile(tmplDir, "api_statistics.html")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create a function map for templates.
 	funcs := template.FuncMap{
@@ -176,6 +184,8 @@ func New(tmplDir fs.FS, extraData map[string]interface{}, secret [64]byte) *echo
 		"global_settings.html": template.Must(template.New("global_settings").Funcs(funcs).Parse(tmplBaseString + tmplGlobalSettingsString)),
 		"users_settings.html":  template.Must(template.New("users_settings").Funcs(funcs).Parse(tmplBaseString + tmplUsersSettingsString)),
 		"status.html":          template.Must(template.New("status").Funcs(funcs).Parse(tmplBaseString + tmplStatusString)),
+		"api_keys.html":        template.Must(template.New("api_keys").Funcs(funcs).Parse(tmplBaseString + tmplAPIKeysString)),
+		"api_statistics.html":  template.Must(template.New("api_statistics").Funcs(funcs).Parse(tmplBaseString + tmplAPIStatisticsString)),
 	}
 
 	// Parse the log level from environment (default INFO).

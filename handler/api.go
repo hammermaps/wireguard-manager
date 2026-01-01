@@ -70,7 +70,13 @@ func hashAPIKey(key string) string {
 // APIKeyManagementPage renders the API key management page
 func APIKeyManagementPage(db store.IStore) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.Render(http.StatusOK, "api_keys.html", map[string]interface{}{})
+		return c.Render(http.StatusOK, "api_keys.html", map[string]interface{}{
+			"baseData": model.BaseData{
+				Active:      "api-keys",
+				CurrentUser: currentUser(c),
+				Admin:       isAdmin(c),
+			},
+		})
 	}
 }
 
@@ -284,7 +290,13 @@ func SetGroupStatus(db store.IStore) echo.HandlerFunc {
 // APIStatisticsPage renders the API statistics page
 func APIStatisticsPage(db store.IStore) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.Render(http.StatusOK, "api_statistics.html", map[string]interface{}{})
+		return c.Render(http.StatusOK, "api_statistics.html", map[string]interface{}{
+			"baseData": model.BaseData{
+				Active:      "api-statistics",
+				CurrentUser: currentUser(c),
+				Admin:       isAdmin(c),
+			},
+		})
 	}
 }
 
