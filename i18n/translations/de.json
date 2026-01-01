@@ -70,7 +70,46 @@
     "add_more": "Weitere hinzufügen"
   },
   "page": {
-    "vpn_clients_title": "VPN WireGuard-Clients"
+    "vpn_clients_title": "VPN WireGuard-Clients",
+    "vpn_connected_title": "VPN Verbundene Benutzer (Peers)",
+    "vpn_status_title": "VPN Verbundene Benutzer (Peers)"
+  },
+  "status_page": {
+    "stat_total_clients": "Clients insgesamt",
+    "stat_connected_clients": "Verbundene Clients",
+    "stat_total_received": "Empfangen insgesamt",
+    "stat_total_transmitted": "Gesendet insgesamt",
+    "client_data_transfer": "Client-Datenübertragung",
+    "client_statistics_title": "Client-Statistiken nach Datenvolumen",
+    "table_caption": "Liste der verbundenen Peers für Gerät wg0",
+    "table_number": "#",
+    "table_name": "Name",
+    "table_email": "E-Mail",
+    "table_allocated_ips": "Zugewiesene IPs",
+    "table_endpoint": "Endpunkt",
+    "table_public_key": "Öffentlicher Schlüssel",
+    "table_received": "Empfangen",
+    "table_transmitted": "Gesendet",
+    "table_total": "Gesamt",
+    "table_connected": "Verbunden",
+    "table_last_handshake": "Letzter Handshake",
+    "no_data": "Keine Client-Daten verfügbar",
+    "top_clients_chart": "Top 10 Clients nach Datenübertragung",
+    "received_mb": "Empfangen (MB)",
+    "transmitted_mb": "Gesendet (MB)",
+    "data_transfer_mb": "Datenübertragung (MB)",
+    "clients_label": "Clients"
+  },
+  "clients_page": {
+    "qr_code_title": "QR-Code",
+    "edit_client_title": "Client bearbeiten",
+    "disable_title": "Deaktivieren",
+    "remove_title": "Entfernen",
+    "disable_message": "Sie sind dabei, den Client zu deaktivieren",
+    "remove_message": "Sie sind dabei, den Client zu entfernen",
+    "send_button": "Senden",
+    "enable_client": "Diesen Client aktivieren",
+    "confirm_group_action": "Sind Sie sicher, dass Sie möchten"
   },
   "footer": {
     "version": "Version",
