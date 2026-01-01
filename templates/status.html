@@ -177,12 +177,12 @@ function sortStatsData() {
         valB = b.index;
         break;
       case 1: // Name
-        valA = a.name.toLowerCase();
-        valB = b.name.toLowerCase();
+        valA = (a.name || '').toLowerCase();
+        valB = (b.name || '').toLowerCase();
         break;
       case 2: // Email
-        valA = a.email.toLowerCase();
-        valB = b.email.toLowerCase();
+        valA = (a.email || '').toLowerCase();
+        valB = (b.email || '').toLowerCase();
         break;
       case 3: // Received
         valA = a.received;
@@ -352,13 +352,13 @@ function escapeHtml(text) {
                             <table class="table table-sm table-bordered table-hover" id="stats-table">
                                 <thead>
                                     <tr>
-                                        <th scope="col" style="cursor: pointer;" onclick="sortStatsTable(0)"># <i class="fas fa-sort"></i></th>
-                                        <th scope="col" style="cursor: pointer;" onclick="sortStatsTable(1)">Name <i class="fas fa-sort"></i></th>
-                                        <th scope="col" style="cursor: pointer;" onclick="sortStatsTable(2)">Email <i class="fas fa-sort"></i></th>
-                                        <th scope="col" style="cursor: pointer;" onclick="sortStatsTable(3)">Received <i class="fas fa-sort"></i></th>
-                                        <th scope="col" style="cursor: pointer;" onclick="sortStatsTable(4)">Transmitted <i class="fas fa-sort"></i></th>
-                                        <th scope="col" style="cursor: pointer;" onclick="sortStatsTable(5)">Total <i class="fas fa-sort"></i></th>
-                                        <th scope="col" style="cursor: pointer;" onclick="sortStatsTable(6)">Connected <i class="fas fa-sort"></i></th>
+                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(0)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(0)"># <i class="fas fa-sort"></i></th>
+                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(1)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(1)">Name <i class="fas fa-sort"></i></th>
+                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(2)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(2)">Email <i class="fas fa-sort"></i></th>
+                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(3)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(3)">Received <i class="fas fa-sort"></i></th>
+                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(4)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(4)">Transmitted <i class="fas fa-sort"></i></th>
+                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(5)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(5)">Total <i class="fas fa-sort"></i></th>
+                                        <th scope="col" role="button" tabindex="0" style="cursor: pointer;" onclick="sortStatsTable(6)" onkeypress="if(event.key==='Enter'||event.key===' ')sortStatsTable(6)">Connected <i class="fas fa-sort"></i></th>
                                     </tr>
                                 </thead>
                                 <tbody id="stats-table-body">
