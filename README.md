@@ -40,8 +40,9 @@ WireGuard Manager is an open-source web application written in Go that simplifie
 5. [Build From Source](#build-from-source)
    - [Build Docker Image](#build-docker-image)
    - [Build Binary File](#build-binary-file)
-6. [Development Setup](#development-setup)
-7. [License](#license)
+6. [API Documentation](#api-documentation)
+7. [Development Setup](#development-setup)
+8. [License](#license)
 
 ---
 
@@ -477,6 +478,38 @@ docker compose build \
    ```bash
    ./wireguard-manager
    ```
+
+---
+
+## API Documentation
+
+WireGuard Manager provides a comprehensive REST API for programmatic access to all management functions. The API supports:
+
+- **Client Management**: Create, read, update, and delete VPN clients
+- **Group Operations**: Bulk enable/disable clients by group
+- **API Key Management**: Create and manage API keys with granular permissions
+- **API Statistics**: Track usage and monitor API activity
+
+### Quick Start
+
+1. Create an API key in the web interface under **API → API Key Management**
+2. Use the API key in the Authorization header:
+   ```bash
+   curl -X GET "https://your-server.com/api/v1/clients" \
+     -H "Authorization: Bearer YOUR_API_KEY"
+   ```
+
+### Documentation
+
+- **[API_DOCUMENTATION.md](API_DOCUMENTATION.md)** - Complete API reference (English)
+- **[API_DOCUMENTATION_DE.md](API_DOCUMENTATION_DE.md)** - Vollständige API-Referenz (Deutsch)
+
+Both documentation files include:
+- Detailed endpoint descriptions
+- Authentication and permissions
+- Code examples in multiple languages (Bash, Python, JavaScript, Go, PowerShell)
+- Best practices and troubleshooting guides
+- Real-world usage scenarios
 
 ---
 
