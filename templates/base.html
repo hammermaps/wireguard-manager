@@ -29,107 +29,215 @@
     <!-- END: On page css -->
     <style>
         /* Base Dark Mode Styles */
-        body, .content-wrapper {
+        body.dark-mode, body.dark-mode .content-wrapper {
             background-color: #121212;
             color: #e0e0e0;
         }
-        .navbar, .main-sidebar, .sidebar, .modal-body, .modal-footer {
+        body.dark-mode .navbar, body.dark-mode .main-sidebar, body.dark-mode .sidebar, body.dark-mode .modal-body, body.dark-mode .modal-footer {
             background-color: #1e1e1e;
         }
-        .navbar-light .navbar-nav .nav-link, .nav-link, .navbar-nav .nav-item .nav-link {
+        body.dark-mode .navbar-light .navbar-nav .nav-link, body.dark-mode .nav-link, body.dark-mode .navbar-nav .nav-item .nav-link {
             color: #b0b0b0;
         }
-        .navbar-light .navbar-nav .nav-link:hover, .modal-body, .btn {
+        body.dark-mode .navbar-light .navbar-nav .nav-link:hover, body.dark-mode .modal-body, body.dark-mode .btn {
             color: #ffffff;
         }
-        .main-footer, .btn-default {
+        body.dark-mode .main-footer, body.dark-mode .btn-default {
             background-color: #1c1c1c;
             color: #e0e0e0;
         }
-        .sidebar-dark-primary .nav-link {
+        body.dark-mode .sidebar-dark-primary .nav-link {
             color: #e0e0e0;
         }
-        .sidebar-dark-primary .nav-link:hover {
+        body.dark-mode .sidebar-dark-primary .nav-link:hover {
             background-color: #444444;
         }
         /* Dark mode for buttons */
-        .btn-outline-primary {
+        body.dark-mode .btn-outline-primary {
             border-color: #4e73df;
             color: #4e73df;
         }
-        .btn-outline-primary:hover {
+        body.dark-mode .btn-outline-primary:hover {
             background-color: #4e73df;
             color: #ffffff;
         }
-        .card .overlay, .info-box .overlay, .overlay-wrapper .overlay, .small-box .overlay {
+        body.dark-mode .card .overlay, body.dark-mode .info-box .overlay, body.dark-mode .overlay-wrapper .overlay, body.dark-mode .small-box .overlay {
             background-color: rgb(255 184 184 / 70%);
         }
-        .btn-outline-danger {
+        body.dark-mode .btn-outline-danger {
             border-color: #e74a3b;
             color: #e74a3b;
         }
-        .btn-outline-danger:hover {
+        body.dark-mode .btn-outline-danger:hover {
             background-color: #e74a3b;
             color: #ffffff;
         }
         /* Modify inputs and form elements */
-        input, select, textarea, .form-control, .form-control:disabled, div.tagsinput {
+        body.dark-mode input, body.dark-mode select, body.dark-mode textarea, body.dark-mode .form-control, body.dark-mode .form-control:disabled, body.dark-mode div.tagsinput {
             background-color: #333333 !important;
             color: #e0e0e0 !important;
             border: 1px solid #555 !important;
         }
-        #dns_servers_tag, #addresses_tag, #client_allocated_ips_tag, #client_allowed_ips_tag {
+        body.dark-mode #dns_servers_tag, body.dark-mode #addresses_tag, body.dark-mode #client_allocated_ips_tag, body.dark-mode #client_allowed_ips_tag {
             border: inherit !important;
         }
-        input::placeholder, select::placeholder, textarea::placeholder, #search-input::placeholder {
+        body.dark-mode input::placeholder, body.dark-mode select::placeholder, body.dark-mode textarea::placeholder, body.dark-mode #search-input::placeholder {
             color: #b0b0b0;
         }
-        .custom-select {
+        body.dark-mode .custom-select {
             background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'%3e%3cpath fill='%23dee2e6' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") right .75rem center/8px 10px no-repeat;
         }
-        input[type="checkbox"], input[type="radio"] {
+        body.dark-mode input[type="checkbox"], body.dark-mode input[type="radio"] {
             background-color: #444;
         }
-        .form-control:focus {
+        body.dark-mode .form-control:focus {
             background-color: #555555;
             border-color: #80bdff;
         }
-        .table-success td {
+        body.dark-mode .table-success td {
             border-color: #8fd19e;
         }
-        .table-success > td, .table-success>th {
+        body.dark-mode .table-success > td, body.dark-mode .table-success>th {
             background-color: #00430f;
         }
-        div.tagsinput span.tag {
+        body.dark-mode div.tagsinput span.tag {
             border: 1px solid #22923c;
             background: #181b16;
             color: #35d85b;
         }
-        div.tagsinput span.tag a {
+        body.dark-mode div.tagsinput span.tag a {
             color: #35d85b;
         }
-        .modal-content, .card, table, .select2-dropdown {
+        body.dark-mode .modal-content, body.dark-mode .card, body.dark-mode table, body.dark-mode .select2-dropdown {
             background-color: #2a2a2a;
             color: #e0e0e0;
         }
-        .modal-header {
+        body.dark-mode .modal-header {
             border-bottom: 1px solid #555;
         }
-        .modal-footer {
+        body.dark-mode .modal-footer {
             border-top: 1px solid #555;
         }
         /* Dark mode for the sidebar active state */
-        .nav-sidebar .nav-link.active {
+        body.dark-mode .nav-sidebar .nav-link.active {
             background-color: #444;
         }
-        table th, table td {
+        body.dark-mode table th, body.dark-mode table td {
             color: #e0e0e0;
             border: 1px solid #444;
+        }
+
+        /* Light Mode Styles (default) */
+        body.light-mode, body.light-mode .content-wrapper {
+            background-color: #f4f6f9;
+            color: #212529;
+        }
+        body.light-mode .navbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #dee2e6;
+        }
+        body.light-mode .main-sidebar {
+            background-color: #343a40;
+        }
+        body.light-mode .sidebar {
+            background-color: #343a40;
+        }
+        body.light-mode .navbar-light .navbar-nav .nav-link, body.light-mode .nav-link, body.light-mode .navbar-nav .nav-item .nav-link {
+            color: #495057;
+        }
+        body.light-mode .navbar-light .navbar-nav .nav-link:hover {
+            color: #212529;
+        }
+        body.light-mode .main-footer {
+            background-color: #ffffff;
+            color: #212529;
+            border-top: 1px solid #dee2e6;
+        }
+        body.light-mode .sidebar-dark-primary .nav-link {
+            color: #c2c7d0;
+        }
+        body.light-mode .sidebar-dark-primary .nav-link:hover {
+            background-color: #495057;
+        }
+        body.light-mode .btn-outline-primary {
+            border-color: #007bff;
+            color: #007bff;
+        }
+        body.light-mode .btn-outline-primary:hover {
+            background-color: #007bff;
+            color: #ffffff;
+        }
+        body.light-mode .btn-outline-danger {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+        body.light-mode .btn-outline-danger:hover {
+            background-color: #dc3545;
+            color: #ffffff;
+        }
+        body.light-mode input, body.light-mode select, body.light-mode textarea, body.light-mode .form-control, body.light-mode div.tagsinput {
+            background-color: #ffffff !important;
+            color: #495057 !important;
+            border: 1px solid #ced4da !important;
+        }
+        body.light-mode .form-control:disabled {
+            background-color: #e9ecef !important;
+        }
+        body.light-mode input::placeholder, body.light-mode select::placeholder, body.light-mode textarea::placeholder, body.light-mode #search-input::placeholder {
+            color: #6c757d;
+        }
+        body.light-mode .form-control:focus {
+            background-color: #ffffff;
+            border-color: #80bdff;
+        }
+        body.light-mode div.tagsinput span.tag {
+            border: 1px solid #28a745;
+            background: #d4edda;
+            color: #155724;
+        }
+        body.light-mode div.tagsinput span.tag a {
+            color: #155724;
+        }
+        body.light-mode .modal-content, body.light-mode .card {
+            background-color: #ffffff;
+            color: #212529;
+        }
+        body.light-mode table {
+            background-color: #ffffff;
+            color: #212529;
+        }
+        body.light-mode .select2-dropdown {
+            background-color: #ffffff;
+            color: #212529;
+        }
+        body.light-mode .modal-header {
+            border-bottom: 1px solid #dee2e6;
+        }
+        body.light-mode .modal-footer {
+            border-top: 1px solid #dee2e6;
+        }
+        body.light-mode .modal-body {
+            background-color: #ffffff;
+            color: #212529;
+        }
+        body.light-mode .nav-sidebar .nav-link.active {
+            background-color: #007bff;
+        }
+        body.light-mode table th, body.light-mode table td {
+            color: #212529;
+            border: 1px solid #dee2e6;
+        }
+        body.light-mode .btn-default {
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        body.light-mode .card .overlay, body.light-mode .info-box .overlay, body.light-mode .overlay-wrapper .overlay, body.light-mode .small-box .overlay {
+            background-color: rgba(255, 255, 255, 0.7);
         }
     </style>
 </head>
 
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini dark-mode">
     <!-- Site wrapper -->
     <div class="wrapper">
         <!-- Navbar -->
@@ -167,6 +275,16 @@
 
             <!-- Right navbar links -->
             <div class="navbar-nav ml-auto">
+                <!-- Theme Switcher -->
+                <div class="nav-item dropdown" style="margin-right: 0.5em;">
+                    <a class="nav-link dropdown-toggle" href="#" id="themeDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-adjust"></i> <span id="current-theme">{{tr .t "nav.theme_dark"}}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="themeDropdown">
+                        <a class="dropdown-item" href="#" onclick="setTheme('light'); return false;"><i class="fas fa-sun"></i> {{tr .t "nav.theme_light"}}</a>
+                        <a class="dropdown-item" href="#" onclick="setTheme('dark'); return false;"><i class="fas fa-moon"></i> {{tr .t "nav.theme_dark"}}</a>
+                    </div>
+                </div>
                 <!-- Language Switcher -->
                 <div class="nav-item dropdown" style="margin-right: 0.5em;">
                     <a class="nav-link dropdown-toggle" href="#" id="langDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -453,6 +571,9 @@
             toastr.options.closeDuration = 100;
             toastr.options.positionClass = 'toast-top-right-fix';
 
+            // Initialize theme from localStorage
+            initializeTheme();
+
             // Initial call, and then poll every 5 seconds for config changes
             updateApplyConfigVisibility();
             setInterval(updateApplyConfigVisibility, 5000);
@@ -463,6 +584,36 @@
                 setInterval(updateStatusTable, 5000);
             }
         });
+
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            setTheme(savedTheme, false);
+        }
+
+        function setTheme(theme, save = true) {
+            const body = document.body;
+            const themeLabels = {
+                'light': '{{tr .t "nav.theme_light"}}',
+                'dark': '{{tr .t "nav.theme_dark"}}'
+            };
+            
+            // Remove both theme classes first
+            body.classList.remove('light-mode', 'dark-mode');
+            
+            // Add the selected theme class
+            body.classList.add(theme + '-mode');
+            
+            // Update the dropdown text
+            const currentThemeEl = document.getElementById('current-theme');
+            if (currentThemeEl) {
+                currentThemeEl.textContent = themeLabels[theme] || themeLabels['dark'];
+            }
+            
+            // Save to localStorage if requested
+            if (save) {
+                localStorage.setItem('theme', theme);
+            }
+        }
 
         function addGlobalStyle(css, id) {
             if (!document.querySelector('#' + id)) {
