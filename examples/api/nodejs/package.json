@@ -1,0 +1,20 @@
+{
+  "name": "wireguard-manager-api-examples",
+  "version": "1.0.0",
+  "description": "Example scripts for WireGuard Manager API",
+  "main": "list_clients.js",
+  "scripts": {
+    "list": "node list_clients.js",
+    "create": "node create_client.js"
+  },
+  "keywords": [
+    "wireguard",
+    "api",
+    "vpn"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
