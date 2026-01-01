@@ -310,6 +310,16 @@ func main() {
 	app.GET(util.BasePath+"/api/suggest-client-ips", handler.SuggestIPAllocation(db), handler.ValidSession)
 	app.POST(util.BasePath+"/api/apply-wg-config", handler.ApplyServerConfig(db, tmplDir),
 		handler.ValidSession, handler.ContentTypeJson)
+	
+	// WireGuard server control routes (admin only)
+	app.POST(util.BasePath+"/api/wg-server/start", handler.StartWireGuardServer(db),
+		handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
+	app.POST(util.BasePath+"/api/wg-server/stop", handler.StopWireGuardServer(db),
+		handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
+	app.POST(util.BasePath+"/api/wg-server/restart", handler.RestartWireGuardServer(db),
+		handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
+	app.GET(util.BasePath+"/api/wg-server/status", handler.GetWireGuardStatus(db),
+		handler.ValidSession, handler.NeedsAdmin)
 
 	// API Key Management routes (admin only)
 	app.GET(util.BasePath+"/api-keys", handler.APIKeyManagementPage(db), handler.ValidSession, handler.RefreshSession, handler.NeedsAdmin)

@@ -28,11 +28,20 @@
   "modal": {
     "new_client_title": "New WireGuard Client",
     "apply_config_title": "Apply Config",
-    "apply_config_message": "Do you want to write config file and restart WireGuard server?",
+    "apply_config_message": "Do you want to write config file and reload WireGuard server (wg syncconf)?",
     "email_config_title": "Email Configuration",
     "cancel": "Cancel",
     "submit": "Submit",
-    "apply": "Apply"
+    "apply": "Apply",
+    "server_start_title": "Start Server",
+    "server_start_message": "Do you want to start the WireGuard server?",
+    "server_stop_title": "Stop Server",
+    "server_stop_message": "Do you want to stop the WireGuard server?",
+    "server_restart_title": "Restart Server",
+    "server_restart_message": "Do you want to restart the WireGuard server?",
+    "start": "Start",
+    "stop": "Stop",
+    "restart": "Restart"
   },
   "form": {
     "name": "Name",
@@ -78,6 +87,21 @@
     "error_loading": "Error loading client data.",
     "error_suggesting": "Error suggesting IP allocation.",
     "config_check_error": "Error checking config changes.",
-    "please_enter_name": "Please enter a name"
+    "please_enter_name": "Please enter a name",
+    "server_started_successfully": "WireGuard server started successfully",
+    "server_stopped_successfully": "WireGuard server stopped successfully",
+    "server_restarted_successfully": "WireGuard server restarted successfully",
+    "error_starting_server": "Error starting server.",
+    "error_stopping_server": "Error stopping server.",
+    "error_restarting_server": "Error restarting server."
+  },
+  "server": {
+    "control": "Server Control",
+    "start_button": "Start Server",
+    "stop_button": "Stop Server",
+    "restart_button": "Restart Server",
+    "status": "Status",
+    "running": "Running",
+    "stopped": "Stopped"
   }
 }

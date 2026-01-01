@@ -36,3 +36,6 @@ examples/docker-compose/db
 
 #Dev paths
 templates/_dev/
+
+# Session secrets and sensitive config
+util/db/
