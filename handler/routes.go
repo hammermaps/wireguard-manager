@@ -1127,13 +1127,13 @@ func ApplyServerConfig(db store.IStore, tmplDir fs.FS) echo.HandlerFunc {
 			log.Error("Cannot apply server config: ", err)
 			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: fmt.Sprintf("Cannot apply server config: %v", err)})
 		}
-		
+
 		// Reload WireGuard using wg syncconf instead of full restart
 		if err := util.ReloadWireGuard(settings); err != nil {
 			log.Error("Cannot reload WireGuard: ", err)
 			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: fmt.Sprintf("Config written but failed to reload WireGuard: %v", err)})
 		}
-		
+
 		if err := util.UpdateHashes(db); err != nil {
 			log.Error("Cannot update hashes: ", err)
 			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: fmt.Sprintf("Cannot update hashes: %v", err)})

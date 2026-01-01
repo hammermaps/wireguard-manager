@@ -36,12 +36,12 @@ type APIKey struct {
 
 // APIKeyPermission defines available permissions for API keys
 const (
-	PermissionReadClients   = "read:clients"
-	PermissionWriteClients  = "write:clients"
-	PermissionReadServer    = "read:server"
-	PermissionWriteServer   = "write:server"
-	PermissionManageGroups  = "manage:groups"
-	PermissionReadStats     = "read:stats"
+	PermissionReadClients  = "read:clients"
+	PermissionWriteClients = "write:clients"
+	PermissionReadServer   = "read:server"
+	PermissionWriteServer  = "write:server"
+	PermissionManageGroups = "manage:groups"
+	PermissionReadStats    = "read:stats"
 )
 
 // APIAccessLog represents a log entry for API access

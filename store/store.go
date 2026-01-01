@@ -52,25 +52,25 @@ type IStore interface {
 	// Security Management
 	GetSecuritySettings() (model.SecuritySettings, error)
 	SaveSecuritySettings(settings model.SecuritySettings) error
-	
+
 	// Security Events
 	SaveSecurityEvent(event model.SecurityEvent) error
 	GetSecurityEvents(limit int) ([]model.SecurityEvent, error)
 	GetSecurityEventsByType(eventType string, limit int) ([]model.SecurityEvent, error)
-	
+
 	// IP Blocking
 	GetIPBlocks() ([]model.IPBlock, error)
 	GetIPBlockByIP(ip string) (model.IPBlock, error)
 	SaveIPBlock(block model.IPBlock) error
 	DeleteIPBlock(id string) error
 	IsIPBlocked(ip string) (bool, error)
-	
+
 	// GeoIP Rules
 	GetGeoIPRules() ([]model.GeoIPRule, error)
 	GetGeoIPRuleByCountry(countryCode string) (model.GeoIPRule, error)
 	SaveGeoIPRule(rule model.GeoIPRule) error
 	DeleteGeoIPRule(id string) error
-	
+
 	// Brute Force Protection
 	GetBruteForceAttempt(ip string) (model.BruteForceAttempt, error)
 	SaveBruteForceAttempt(attempt model.BruteForceAttempt) error

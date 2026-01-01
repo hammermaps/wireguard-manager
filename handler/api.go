@@ -30,10 +30,10 @@ type createAPIKeyRequest struct {
 }
 
 type createAPIKeyResponse struct {
-	Success bool           `json:"success"`
-	Message string         `json:"message"`
-	APIKey  *model.APIKey  `json:"api_key,omitempty"`
-	RawKey  string         `json:"raw_key,omitempty"`
+	Success bool          `json:"success"`
+	Message string        `json:"message"`
+	APIKey  *model.APIKey `json:"api_key,omitempty"`
+	RawKey  string        `json:"raw_key,omitempty"`
 }
 
 type updateAPIKeyRequest struct {

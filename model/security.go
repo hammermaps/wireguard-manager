@@ -15,13 +15,13 @@ type SecurityEvent struct {
 
 // IPBlock represents a blocked IP address
 type IPBlock struct {
-	ID          string    `json:"id"`
-	IP          string    `json:"ip"`
-	Reason      string    `json:"reason"`
-	BlockedBy   string    `json:"blocked_by"` // username of admin who blocked it
-	Permanent   bool      `json:"permanent"`
-	ExpiresAt   time.Time `json:"expires_at,omitempty"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID        string    `json:"id"`
+	IP        string    `json:"ip"`
+	Reason    string    `json:"reason"`
+	BlockedBy string    `json:"blocked_by"` // username of admin who blocked it
+	Permanent bool      `json:"permanent"`
+	ExpiresAt time.Time `json:"expires_at,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // GeoIPRule represents a country-based blocking rule

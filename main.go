@@ -98,7 +98,6 @@ func init() {
 	flag.StringVar(&flagDatabaseDSN, "database-dsn", util.LookupEnvOrString(util.DatabaseDSNEnvVar, flagDatabaseDSN), "Database DSN for MySQL (e.g., user:password@tcp(host:port)/dbname)")
 	flag.StringVar(&flagDatabasePath, "database-path", util.LookupEnvOrString(util.DatabasePathEnvVar, flagDatabasePath), "Database path for JSON DB")
 
-
 	// Handle SMTP password, Sendgrid API key and session secret.
 	var (
 		smtpPasswordLookup   = util.LookupEnvOrString("SMTP_PASSWORD", flagSmtpPassword)
@@ -313,7 +312,7 @@ func main() {
 	app.GET(util.BasePath+"/api/suggest-client-ips", handler.SuggestIPAllocation(db), handler.ValidSession)
 	app.POST(util.BasePath+"/api/apply-wg-config", handler.ApplyServerConfig(db, tmplDir),
 		handler.ValidSession, handler.ContentTypeJson)
-	
+
 	// WireGuard server control routes (admin only)
 	app.POST(util.BasePath+"/api/wg-server/start", handler.StartWireGuardServer(db),
 		handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
@@ -340,12 +339,12 @@ func main() {
 	app.POST(util.BasePath+"/api/security/settings", handler.UpdateSecuritySettings(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
 	app.GET(util.BasePath+"/api/security/events", handler.GetSecurityEvents(db), handler.ValidSession, handler.NeedsAdmin)
 	app.GET(util.BasePath+"/api/security/statistics", handler.GetSecurityStatistics(db), handler.ValidSession, handler.NeedsAdmin)
-	
+
 	// IP Blocking routes (admin only)
 	app.GET(util.BasePath+"/api/security/ip-blocks", handler.GetIPBlocks(db), handler.ValidSession, handler.NeedsAdmin)
 	app.POST(util.BasePath+"/api/security/ip-blocks", handler.CreateIPBlock(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
 	app.DELETE(util.BasePath+"/api/security/ip-blocks", handler.DeleteIPBlock(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)
-	
+
 	// GeoIP Blocking routes (admin only)
 	app.GET(util.BasePath+"/api/security/geoip-rules", handler.GetGeoIPRules(db), handler.ValidSession, handler.NeedsAdmin)
 	app.POST(util.BasePath+"/api/security/geoip-rules", handler.CreateGeoIPRule(db), handler.ValidSession, handler.ContentTypeJson, handler.NeedsAdmin)

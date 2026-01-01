@@ -1040,9 +1040,9 @@ func (o *MySQLDB) GetAPIAccessLogsByKeyID(keyID string, limit int) ([]model.APIA
 // Security Management
 
 func (db *MySQLDB) GetSecuritySettings() (model.SecuritySettings, error) {
-settings := model.SecuritySettings{}
+	settings := model.SecuritySettings{}
 
-query := `
+	query := `
 SELECT brute_force_enabled, brute_force_max_attempts, brute_force_window_minutes, 
        brute_force_block_minutes, ip_blocking_enabled, geoip_enabled, 
        geoip_default_action, updated_at
@@ -1050,36 +1050,36 @@ FROM security_settings
 LIMIT 1
 `
 
-err := db.conn.QueryRow(query).Scan(
-&settings.BruteForceEnabled,
-&settings.BruteForceMaxAttempts,
-&settings.BruteForceWindowMinutes,
-&settings.BruteForceBlockMinutes,
-&settings.IPBlockingEnabled,
-&settings.GeoIPEnabled,
-&settings.GeoIPDefaultAction,
-&settings.UpdatedAt,
-)
+	err := db.conn.QueryRow(query).Scan(
+		&settings.BruteForceEnabled,
+		&settings.BruteForceMaxAttempts,
+		&settings.BruteForceWindowMinutes,
+		&settings.BruteForceBlockMinutes,
+		&settings.IPBlockingEnabled,
+		&settings.GeoIPEnabled,
+		&settings.GeoIPDefaultAction,
+		&settings.UpdatedAt,
+	)
 
-if err == sql.ErrNoRows {
-// Return default settings if none exist
-settings = model.DefaultSecuritySettings()
-// Save default settings
-if err := db.SaveSecuritySettings(settings); err != nil {
-return settings, err
-}
-return settings, nil
-}
+	if err == sql.ErrNoRows {
+		// Return default settings if none exist
+		settings = model.DefaultSecuritySettings()
+		// Save default settings
+		if err := db.SaveSecuritySettings(settings); err != nil {
+			return settings, err
+		}
+		return settings, nil
+	}
 
-if err != nil {
-return model.SecuritySettings{}, err
-}
+	if err != nil {
+		return model.SecuritySettings{}, err
+	}
 
-return settings, nil
+	return settings, nil
 }
 
 func (db *MySQLDB) SaveSecuritySettings(settings model.SecuritySettings) error {
-query := `
+	query := `
 INSERT INTO security_settings (
 id, brute_force_enabled, brute_force_max_attempts, brute_force_window_minutes,
 brute_force_block_minutes, ip_blocking_enabled, geoip_enabled,
@@ -1096,187 +1096,187 @@ geoip_default_action = VALUES(geoip_default_action),
 updated_at = VALUES(updated_at)
 `
 
-_, err := db.conn.Exec(query,
-settings.BruteForceEnabled,
-settings.BruteForceMaxAttempts,
-settings.BruteForceWindowMinutes,
-settings.BruteForceBlockMinutes,
-settings.IPBlockingEnabled,
-settings.GeoIPEnabled,
-settings.GeoIPDefaultAction,
-settings.UpdatedAt,
-)
+	_, err := db.conn.Exec(query,
+		settings.BruteForceEnabled,
+		settings.BruteForceMaxAttempts,
+		settings.BruteForceWindowMinutes,
+		settings.BruteForceBlockMinutes,
+		settings.IPBlockingEnabled,
+		settings.GeoIPEnabled,
+		settings.GeoIPDefaultAction,
+		settings.UpdatedAt,
+	)
 
-return err
+	return err
 }
 
 // Security Events
 
 func (db *MySQLDB) SaveSecurityEvent(event model.SecurityEvent) error {
-query := `
+	query := `
 INSERT INTO security_events (id, event_type, ip, country, username, description, created_at)
 VALUES (?, ?, ?, ?, ?, ?, ?)
 `
 
-_, err := db.conn.Exec(query,
-event.ID,
-event.EventType,
-event.IP,
-event.Country,
-event.Username,
-event.Description,
-event.CreatedAt,
-)
+	_, err := db.conn.Exec(query,
+		event.ID,
+		event.EventType,
+		event.IP,
+		event.Country,
+		event.Username,
+		event.Description,
+		event.CreatedAt,
+	)
 
-return err
+	return err
 }
 
 func (db *MySQLDB) GetSecurityEvents(limit int) ([]model.SecurityEvent, error) {
-var events []model.SecurityEvent
+	var events []model.SecurityEvent
 
-query := `
+	query := `
 SELECT id, event_type, ip, COALESCE(country, ''), COALESCE(username, ''), description, created_at
 FROM security_events
 ORDER BY created_at DESC
 `
 
-if limit > 0 {
-query += fmt.Sprintf(" LIMIT %d", limit)
-}
+	if limit > 0 {
+		query += fmt.Sprintf(" LIMIT %d", limit)
+	}
 
-rows, err := db.conn.Query(query)
-if err != nil {
-return events, err
-}
-defer rows.Close()
+	rows, err := db.conn.Query(query)
+	if err != nil {
+		return events, err
+	}
+	defer rows.Close()
 
-for rows.Next() {
-event := model.SecurityEvent{}
-err := rows.Scan(
-&event.ID,
-&event.EventType,
-&event.IP,
-&event.Country,
-&event.Username,
-&event.Description,
-&event.CreatedAt,
-)
-if err != nil {
-return events, err
-}
-events = append(events, event)
-}
+	for rows.Next() {
+		event := model.SecurityEvent{}
+		err := rows.Scan(
+			&event.ID,
+			&event.EventType,
+			&event.IP,
+			&event.Country,
+			&event.Username,
+			&event.Description,
+			&event.CreatedAt,
+		)
+		if err != nil {
+			return events, err
+		}
+		events = append(events, event)
+	}
 
-return events, rows.Err()
+	return events, rows.Err()
 }
 
 func (db *MySQLDB) GetSecurityEventsByType(eventType string, limit int) ([]model.SecurityEvent, error) {
-var events []model.SecurityEvent
+	var events []model.SecurityEvent
 
-query := `
+	query := `
 SELECT id, event_type, ip, COALESCE(country, ''), COALESCE(username, ''), description, created_at
 FROM security_events
 WHERE event_type = ?
 ORDER BY created_at DESC
 `
 
-if limit > 0 {
-query += fmt.Sprintf(" LIMIT %d", limit)
-}
+	if limit > 0 {
+		query += fmt.Sprintf(" LIMIT %d", limit)
+	}
 
-rows, err := db.conn.Query(query, eventType)
-if err != nil {
-return events, err
-}
-defer rows.Close()
+	rows, err := db.conn.Query(query, eventType)
+	if err != nil {
+		return events, err
+	}
+	defer rows.Close()
 
-for rows.Next() {
-event := model.SecurityEvent{}
-err := rows.Scan(
-&event.ID,
-&event.EventType,
-&event.IP,
-&event.Country,
-&event.Username,
-&event.Description,
-&event.CreatedAt,
-)
-if err != nil {
-return events, err
-}
-events = append(events, event)
-}
+	for rows.Next() {
+		event := model.SecurityEvent{}
+		err := rows.Scan(
+			&event.ID,
+			&event.EventType,
+			&event.IP,
+			&event.Country,
+			&event.Username,
+			&event.Description,
+			&event.CreatedAt,
+		)
+		if err != nil {
+			return events, err
+		}
+		events = append(events, event)
+	}
 
-return events, rows.Err()
+	return events, rows.Err()
 }
 
 // IP Blocking
 
 func (db *MySQLDB) GetIPBlocks() ([]model.IPBlock, error) {
-var blocks []model.IPBlock
+	var blocks []model.IPBlock
 
-query := `
+	query := `
 SELECT id, ip, COALESCE(reason, ''), blocked_by, permanent, COALESCE(expires_at, '0001-01-01'), created_at
 FROM ip_blocks
 WHERE permanent = 1 OR (expires_at IS NOT NULL AND expires_at > NOW())
 ORDER BY created_at DESC
 `
 
-rows, err := db.conn.Query(query)
-if err != nil {
-return blocks, err
-}
-defer rows.Close()
+	rows, err := db.conn.Query(query)
+	if err != nil {
+		return blocks, err
+	}
+	defer rows.Close()
 
-for rows.Next() {
-block := model.IPBlock{}
-err := rows.Scan(
-&block.ID,
-&block.IP,
-&block.Reason,
-&block.BlockedBy,
-&block.Permanent,
-&block.ExpiresAt,
-&block.CreatedAt,
-)
-if err != nil {
-return blocks, err
-}
-blocks = append(blocks, block)
-}
+	for rows.Next() {
+		block := model.IPBlock{}
+		err := rows.Scan(
+			&block.ID,
+			&block.IP,
+			&block.Reason,
+			&block.BlockedBy,
+			&block.Permanent,
+			&block.ExpiresAt,
+			&block.CreatedAt,
+		)
+		if err != nil {
+			return blocks, err
+		}
+		blocks = append(blocks, block)
+	}
 
-return blocks, rows.Err()
+	return blocks, rows.Err()
 }
 
 func (db *MySQLDB) GetIPBlockByIP(ip string) (model.IPBlock, error) {
-block := model.IPBlock{}
+	block := model.IPBlock{}
 
-query := `
+	query := `
 SELECT id, ip, COALESCE(reason, ''), blocked_by, permanent, COALESCE(expires_at, '0001-01-01'), created_at
 FROM ip_blocks
 WHERE ip = ? AND (permanent = 1 OR (expires_at IS NOT NULL AND expires_at > NOW()))
 LIMIT 1
 `
 
-err := db.conn.QueryRow(query, ip).Scan(
-&block.ID,
-&block.IP,
-&block.Reason,
-&block.BlockedBy,
-&block.Permanent,
-&block.ExpiresAt,
-&block.CreatedAt,
-)
+	err := db.conn.QueryRow(query, ip).Scan(
+		&block.ID,
+		&block.IP,
+		&block.Reason,
+		&block.BlockedBy,
+		&block.Permanent,
+		&block.ExpiresAt,
+		&block.CreatedAt,
+	)
 
-if err != nil {
-return model.IPBlock{}, err
-}
+	if err != nil {
+		return model.IPBlock{}, err
+	}
 
-return block, nil
+	return block, nil
 }
 
 func (db *MySQLDB) SaveIPBlock(block model.IPBlock) error {
-query := `
+	query := `
 INSERT INTO ip_blocks (id, ip, reason, blocked_by, permanent, expires_at, created_at)
 VALUES (?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
@@ -1285,110 +1285,110 @@ permanent = VALUES(permanent),
 expires_at = VALUES(expires_at)
 `
 
-var expiresAt interface{}
-if !block.ExpiresAt.IsZero() {
-expiresAt = block.ExpiresAt
-}
+	var expiresAt interface{}
+	if !block.ExpiresAt.IsZero() {
+		expiresAt = block.ExpiresAt
+	}
 
-_, err := db.conn.Exec(query,
-block.ID,
-block.IP,
-block.Reason,
-block.BlockedBy,
-block.Permanent,
-expiresAt,
-block.CreatedAt,
-)
+	_, err := db.conn.Exec(query,
+		block.ID,
+		block.IP,
+		block.Reason,
+		block.BlockedBy,
+		block.Permanent,
+		expiresAt,
+		block.CreatedAt,
+	)
 
-return err
+	return err
 }
 
 func (db *MySQLDB) DeleteIPBlock(id string) error {
-query := `DELETE FROM ip_blocks WHERE id = ?`
-_, err := db.conn.Exec(query, id)
-return err
+	query := `DELETE FROM ip_blocks WHERE id = ?`
+	_, err := db.conn.Exec(query, id)
+	return err
 }
 
 func (db *MySQLDB) IsIPBlocked(ip string) (bool, error) {
-var count int
+	var count int
 
-query := `
+	query := `
 SELECT COUNT(*) FROM ip_blocks
 WHERE ip = ? AND (permanent = 1 OR (expires_at IS NOT NULL AND expires_at > NOW()))
 `
 
-err := db.conn.QueryRow(query, ip).Scan(&count)
-if err != nil {
-return false, err
-}
+	err := db.conn.QueryRow(query, ip).Scan(&count)
+	if err != nil {
+		return false, err
+	}
 
-return count > 0, nil
+	return count > 0, nil
 }
 
 // GeoIP Rules
 
 func (db *MySQLDB) GetGeoIPRules() ([]model.GeoIPRule, error) {
-var rules []model.GeoIPRule
+	var rules []model.GeoIPRule
 
-query := `
+	query := `
 SELECT id, country_code, COALESCE(country_name, ''), action, created_by, created_at
 FROM geoip_rules
 ORDER BY country_code ASC
 `
 
-rows, err := db.conn.Query(query)
-if err != nil {
-return rules, err
-}
-defer rows.Close()
+	rows, err := db.conn.Query(query)
+	if err != nil {
+		return rules, err
+	}
+	defer rows.Close()
 
-for rows.Next() {
-rule := model.GeoIPRule{}
-err := rows.Scan(
-&rule.ID,
-&rule.CountryCode,
-&rule.CountryName,
-&rule.Action,
-&rule.CreatedBy,
-&rule.CreatedAt,
-)
-if err != nil {
-return rules, err
-}
-rules = append(rules, rule)
-}
+	for rows.Next() {
+		rule := model.GeoIPRule{}
+		err := rows.Scan(
+			&rule.ID,
+			&rule.CountryCode,
+			&rule.CountryName,
+			&rule.Action,
+			&rule.CreatedBy,
+			&rule.CreatedAt,
+		)
+		if err != nil {
+			return rules, err
+		}
+		rules = append(rules, rule)
+	}
 
-return rules, rows.Err()
+	return rules, rows.Err()
 }
 
 func (db *MySQLDB) GetGeoIPRuleByCountry(countryCode string) (model.GeoIPRule, error) {
-rule := model.GeoIPRule{}
+	rule := model.GeoIPRule{}
 
-query := `
+	query := `
 SELECT id, country_code, COALESCE(country_name, ''), action, created_by, created_at
 FROM geoip_rules
 WHERE country_code = ?
 LIMIT 1
 `
 
-err := db.conn.QueryRow(query, countryCode).Scan(
-&rule.ID,
-&rule.CountryCode,
-&rule.CountryName,
-&rule.Action,
-&rule.CreatedBy,
-&rule.CreatedAt,
-)
+	err := db.conn.QueryRow(query, countryCode).Scan(
+		&rule.ID,
+		&rule.CountryCode,
+		&rule.CountryName,
+		&rule.Action,
+		&rule.CreatedBy,
+		&rule.CreatedAt,
+	)
 
-if err != nil {
-return model.GeoIPRule{}, err
-}
+	if err != nil {
+		return model.GeoIPRule{}, err
+	}
 
-return rule, nil
+	return rule, nil
 }
 
 func (db *MySQLDB) SaveGeoIPRule(rule model.GeoIPRule) error {
-query := `
+	query := `
 INSERT INTO geoip_rules (id, country_code, country_name, action, created_by, created_at)
 VALUES (?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
@@ -1396,52 +1396,52 @@ country_name = VALUES(country_name),
 action = VALUES(action)
 `
 
-_, err := db.conn.Exec(query,
-rule.ID,
-rule.CountryCode,
-rule.CountryName,
-rule.Action,
-rule.CreatedBy,
-rule.CreatedAt,
-)
+	_, err := db.conn.Exec(query,
+		rule.ID,
+		rule.CountryCode,
+		rule.CountryName,
+		rule.Action,
+		rule.CreatedBy,
+		rule.CreatedAt,
+	)
 
-return err
+	return err
 }
 
 func (db *MySQLDB) DeleteGeoIPRule(id string) error {
-query := `DELETE FROM geoip_rules WHERE id = ?`
-_, err := db.conn.Exec(query, id)
-return err
+	query := `DELETE FROM geoip_rules WHERE id = ?`
+	_, err := db.conn.Exec(query, id)
+	return err
 }
 
 // Brute Force Protection
 
 func (db *MySQLDB) GetBruteForceAttempt(ip string) (model.BruteForceAttempt, error) {
-attempt := model.BruteForceAttempt{}
+	attempt := model.BruteForceAttempt{}
 
-query := `
+	query := `
 SELECT ip, attempts, last_attempt, COALESCE(blocked_until, '0001-01-01')
 FROM brute_force_attempts
 WHERE ip = ?
 LIMIT 1
 `
 
-err := db.conn.QueryRow(query, ip).Scan(
-&attempt.IP,
-&attempt.Attempts,
-&attempt.LastAttempt,
-&attempt.BlockedUntil,
-)
+	err := db.conn.QueryRow(query, ip).Scan(
+		&attempt.IP,
+		&attempt.Attempts,
+		&attempt.LastAttempt,
+		&attempt.BlockedUntil,
+	)
 
-if err != nil {
-return model.BruteForceAttempt{}, err
-}
+	if err != nil {
+		return model.BruteForceAttempt{}, err
+	}
 
-return attempt, nil
+	return attempt, nil
 }
 
 func (db *MySQLDB) SaveBruteForceAttempt(attempt model.BruteForceAttempt) error {
-query := `
+	query := `
 INSERT INTO brute_force_attempts (ip, attempts, last_attempt, blocked_until)
 VALUES (?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
@@ -1450,29 +1450,29 @@ last_attempt = VALUES(last_attempt),
 blocked_until = VALUES(blocked_until)
 `
 
-var blockedUntil interface{}
-if !attempt.BlockedUntil.IsZero() {
-blockedUntil = attempt.BlockedUntil
-}
+	var blockedUntil interface{}
+	if !attempt.BlockedUntil.IsZero() {
+		blockedUntil = attempt.BlockedUntil
+	}
 
-_, err := db.conn.Exec(query,
-attempt.IP,
-attempt.Attempts,
-attempt.LastAttempt,
-blockedUntil,
-)
+	_, err := db.conn.Exec(query,
+		attempt.IP,
+		attempt.Attempts,
+		attempt.LastAttempt,
+		blockedUntil,
+	)
 
-return err
+	return err
 }
 
 func (db *MySQLDB) DeleteBruteForceAttempt(ip string) error {
-query := `DELETE FROM brute_force_attempts WHERE ip = ?`
-_, err := db.conn.Exec(query, ip)
-return err
+	query := `DELETE FROM brute_force_attempts WHERE ip = ?`
+	_, err := db.conn.Exec(query, ip)
+	return err
 }
 
 func (db *MySQLDB) CleanupExpiredBruteForceAttempts() error {
-query := `DELETE FROM brute_force_attempts WHERE blocked_until IS NOT NULL AND blocked_until < NOW()`
-_, err := db.conn.Exec(query)
-return err
+	query := `DELETE FROM brute_force_attempts WHERE blocked_until IS NOT NULL AND blocked_until < NOW()`
+	_, err := db.conn.Exec(query)
+	return err
 }
