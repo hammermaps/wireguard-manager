@@ -71,7 +71,6 @@
   },
   "page": {
     "vpn_clients_title": "VPN WireGuard Clients",
-    "vpn_connected_title": "VPN Connected Users (Peers)",
     "vpn_status_title": "VPN Connected Users (Peers)"
   },
   "status_page": {
@@ -108,8 +107,7 @@
     "disable_message": "You are about to disable client",
     "remove_message": "You are about to remove client",
     "send_button": "Send",
-    "enable_client": "Enable this client",
-    "confirm_group_action": "Are you sure you want to"
+    "enable_client": "Enable this client"
   },
   "footer": {
     "version": "Version",
