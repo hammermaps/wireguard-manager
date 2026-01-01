@@ -1,5 +1,5 @@
 {{define "title"}}
-VPN WireGuard Clients
+{{tr .t "page.vpn_clients_title"}}
 {{end}}
 
 {{define "top_css"}}
@@ -17,7 +17,7 @@ VPN WireGuard Clients
 {{end}}
 
 {{define "page_title"}}
-VPN WireGuard Clients
+{{tr .t "page.vpn_clients_title"}}
 {{end}}
 
 {{define "page_content"}}
@@ -34,7 +34,7 @@ VPN WireGuard Clients
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Email Configuration</h4>
+                <h4 class="modal-title">{{tr .t "modal.email_config_title"}}</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -43,13 +43,13 @@ VPN WireGuard Clients
                 <div class="modal-body">
                     <input type="hidden" id="e_client_id" name="e_client_id">
                     <div class="form-group">
-                        <label for="e_client_email" class="control-label">Email address</label>
+                        <label for="e_client_email" class="control-label">{{tr .t "form.email_address"}}</label>
                         <input type="text" class="form-control" id="e_client_email" name="e_client_email">
                     </div>
                 </div>
                 <div class="modal-footer justify-content-between">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success">Send</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{tr .t "modal.cancel"}}</button>
+                    <button type="submit" class="btn btn-success">{{tr .t "clients_page.send_button"}}</button>
                 </div>
             </form>
         </div>
@@ -63,7 +63,7 @@ VPN WireGuard Clients
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">QR Code</h4>
+                <h4 class="modal-title">{{tr .t "clients_page.qr_code_title"}}</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -84,7 +84,7 @@ VPN WireGuard Clients
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Edit Client</h4>
+                <h4 class="modal-title">{{tr .t "clients_page.edit_client_title"}}</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -93,45 +93,45 @@ VPN WireGuard Clients
                 <div class="modal-body">
                     <input type="hidden" id="_client_id" name="_client_id">
                     <div class="form-group">
-                        <label for="_client_name" class="control-label">Name</label>
+                        <label for="_client_name" class="control-label">{{tr .t "form.name"}}</label>
                         <input type="text" class="form-control" id="_client_name" name="_client_name">
                     </div>
                     <div class="form-group">
-                        <label for="_client_email" class="control-label">Email</label>
+                        <label for="_client_email" class="control-label">{{tr .t "form.email"}}</label>
                         <input type="text" class="form-control" id="_client_email" name="client_email">
                     </div>
                     <div class="form-group">
-                        <label for="_client_group" class="control-label">Group</label>
-                        <input type="text" class="form-control" id="_client_group" name="client_group" placeholder="Optional group name">
+                        <label for="_client_group" class="control-label">{{tr .t "form.group"}}</label>
+                        <input type="text" class="form-control" id="_client_group" name="client_group" placeholder="{{tr .t "form.group_placeholder"}}">
                     </div>
                     <div class="form-group">
-                        <label for="_subnet_ranges" class="control-label">Subnet range</label>
+                        <label for="_subnet_ranges" class="control-label">{{tr .t "form.subnet_range"}}</label>
                         <select id="_subnet_ranges" class="select2"
-                            data-placeholder="Select a subnet range" style="width: 100%;">
+                            data-placeholder="{{tr .t "form.subnet_range_placeholder"}}" style="width: 100%;">
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="_client_allocated_ips" class="control-label">IP Allocation</label>
+                        <label for="_client_allocated_ips" class="control-label">{{tr .t "form.ip_allocation"}}</label>
                         <input type="text" data-role="tagsinput" class="form-control" id="_client_allocated_ips">
                     </div>
                     <div class="form-group">
-                        <label for="_client_allowed_ips" class="control-label">Allowed IPs - What subnet traffic should go through WireGuard.</label>
+                        <label for="_client_allowed_ips" class="control-label">{{tr .t "form.allowed_ips"}}</label>
                         <input type="text" data-role="tagsinput" class="form-control" id="_client_allowed_ips">
                     </div>
                     <div class="form-group" style="display:none;">
-                        <label for="_client_extra_allowed_ips" class="control-label">Extra Allowed IPs</label>
+                        <label for="_client_extra_allowed_ips" class="control-label">{{tr .t "form.extra_allowed_ips"}}</label>
                         <input type="text" data-role="tagsinput" class="form-control"
                                id="_client_extra_allowed_ips">
                     </div>
                     <div class="form-group" style="display:none;">
-                        <label for="_client_endpoint" class="control-label">Endpoint</label>
+                        <label for="_client_endpoint" class="control-label">{{tr .t "form.endpoint"}}</label>
                         <input type="text" class="form-control" id="_client_endpoint" name="client_endpoint">
                     </div>
                     <div class="form-group">
                         <div class="icheck-primary d-inline">
                             <input type="checkbox" id="_use_server_dns">
                             <label for="_use_server_dns">
-                                Use server DNS
+                                {{tr .t "form.use_server_dns"}}
                             </label>
                         </div>
                     </div>
@@ -139,34 +139,33 @@ VPN WireGuard Clients
                         <div class="icheck-primary d-inline">
                             <input type="checkbox" id="_enabled">
                             <label for="_enabled">
-                                Enable this client
+                                {{tr .t "clients_page.enable_client"}}
                             </label>
                         </div>
                     </div>
                     <details>
-                        <summary><strong>Public and Preshared Keys</strong>
+                        <summary><strong>{{tr .t "form.keys_section_title"}}</strong>
                             <i class="fas fa-info-circle" data-toggle="tooltip"
-                               data-original-title="Update the server stored
-                               client Public and Preshared keys.">
+                               data-original-title="{{tr .t "form.keys_section_tooltip"}}">
                             </i>
                         </summary>
                         <div class="form-group" style="margin-top: 1rem">
                             <label for="_client_public_key" class="control-label">
-                                Public Key
+                                {{tr .t "form.public_key"}}
                             </label>
                             <input type="text" class="form-control" id="_client_public_key" name="_client_public_key" aria-invalid="false">
                         </div>
                         <div class="form-group">
                             <label for="_client_preshared_key" class="control-label">
-                                Preshared Key
+                                {{tr .t "form.preshared_key"}}
                             </label>
                             <input type="text" class="form-control" id="_client_preshared_key" name="_client_preshared_key">
                         </div>
                     </details>
                 </div>
                 <div class="modal-footer justify-content-between">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success">Save</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{tr .t "modal.cancel"}}</button>
+                    <button type="submit" class="btn btn-success">{{tr .t "modal.submit"}}</button>
                 </div>
             </form>
         </div>
@@ -180,7 +179,7 @@ VPN WireGuard Clients
     <div class="modal-dialog">
         <div class="modal-content bg-warning">
             <div class="modal-header">
-                <h4 class="modal-title">Disable</h4>
+                <h4 class="modal-title">{{tr .t "clients_page.disable_title"}}</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -188,8 +187,8 @@ VPN WireGuard Clients
             <div class="modal-body">
             </div>
             <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-outline-dark" id="pause_client_confirm">Apply</button>
+                <button type="button" class="btn btn-outline-dark" data-dismiss="modal">{{tr .t "modal.cancel"}}</button>
+                <button type="button" class="btn btn-outline-dark" id="pause_client_confirm">{{tr .t "modal.apply"}}</button>
             </div>
         </div>
         <!-- /.modal-content -->
@@ -202,7 +201,7 @@ VPN WireGuard Clients
     <div class="modal-dialog">
         <div class="modal-content bg-danger">
             <div class="modal-header">
-                <h4 class="modal-title">Remove</h4>
+                <h4 class="modal-title">{{tr .t "clients_page.remove_title"}}</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -210,8 +209,8 @@ VPN WireGuard Clients
             <div class="modal-body">
             </div>
             <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-outline-dark" id="remove_client_confirm">Apply</button>
+                <button type="button" class="btn btn-outline-dark" data-dismiss="modal">{{tr .t "modal.cancel"}}</button>
+                <button type="button" class="btn btn-outline-dark" id="remove_client_confirm">{{tr .t "modal.apply"}}</button>
             </div>
         </div>
         <!-- /.modal-content -->
@@ -342,19 +341,19 @@ VPN WireGuard Clients
                 $("#status-selector option").remove();
                 $("#status-selector").append(
                     $("<option></option>")
-                        .text("All")
+                        .text('{{tr .t "status.all"}}')
                         .val("All"),
                     $("<option></option>")
-                        .text("Enabled")
+                        .text('{{tr .t "status.enabled"}}')
                         .val("Enabled"),
                     $("<option></option>")
-                        .text("Disabled")
+                        .text('{{tr .t "status.disabled"}}')
                         .val("Disabled"),
                     $("<option></option>")
-                        .text("Connected")
+                        .text('{{tr .t "status.connected"}}')
                         .val("Connected"),
                     $("<option></option>")
-                        .text("Disconnected")
+                        .text('{{tr .t "status.disconnected"}}')
                         .val("Disconnected")
                 );
                 $.each(data, function(index, item) {
@@ -484,7 +483,7 @@ VPN WireGuard Clients
             const client_id = button.data('clientid');
             const client_name = button.data('clientname');
             const modal = $(this);
-            modal.find('.modal-body').text("You are about to disable client " + client_name);
+            modal.find('.modal-body').text('{{tr .t "clients_page.disable_message"}} ' + client_name);
             modal.find('#pause_client_confirm').val(client_id);
         })
 
@@ -503,7 +502,7 @@ VPN WireGuard Clients
             const client_id = button.data('clientid');
             const client_name = button.data('clientname');
             const modal = $(this);
-            modal.find('.modal-body').text("You are about to remove client " + client_name);
+            modal.find('.modal-body').text('{{tr .t "clients_page.remove_message"}} ' + client_name);
             modal.find('#remove_client_confirm').val(client_id);
         })
 

@@ -70,7 +70,44 @@
     "add_more": "Add More"
   },
   "page": {
-    "vpn_clients_title": "VPN WireGuard Clients"
+    "vpn_clients_title": "VPN WireGuard Clients",
+    "vpn_status_title": "VPN Connected Users (Peers)"
+  },
+  "status_page": {
+    "stat_total_clients": "Total Clients",
+    "stat_connected_clients": "Connected Clients",
+    "stat_total_received": "Total Received",
+    "stat_total_transmitted": "Total Transmitted",
+    "client_data_transfer": "Client Data Transfer",
+    "client_statistics_title": "Client Statistics by Data Volume",
+    "table_caption": "List of connected peers for device wg0",
+    "table_number": "#",
+    "table_name": "Name",
+    "table_email": "Email",
+    "table_allocated_ips": "Allocated IPs",
+    "table_endpoint": "Endpoint",
+    "table_public_key": "Public Key",
+    "table_received": "Received",
+    "table_transmitted": "Transmitted",
+    "table_total": "Total",
+    "table_connected": "Connected",
+    "table_last_handshake": "Last Handshake",
+    "no_data": "No client data available",
+    "top_clients_chart": "Top 10 Clients by Data Transfer",
+    "received_mb": "Received (MB)",
+    "transmitted_mb": "Transmitted (MB)",
+    "data_transfer_mb": "Data Transfer (MB)",
+    "clients_label": "Clients"
+  },
+  "clients_page": {
+    "qr_code_title": "QR Code",
+    "edit_client_title": "Edit Client",
+    "disable_title": "Disable",
+    "remove_title": "Remove",
+    "disable_message": "You are about to disable client",
+    "remove_message": "You are about to remove client",
+    "send_button": "Send",
+    "enable_client": "Enable this client"
   },
   "footer": {
     "version": "Version",
