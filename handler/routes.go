@@ -124,10 +124,7 @@ func Login(db store.IStore) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, jsonHTTPResponse{Success: false, Message: "Invalid login data"})
 		}
 
-		ip := c.Request().RemoteAddr
-		if util.Proxy {
-			ip = c.Request().Header.Get("X-FORWARDED-FOR")
-		}
+		ip := util.GetRealIP(c)
 
 		// Validate username format
 		if !usernameRegexp.MatchString(req.Username) {
@@ -137,6 +134,8 @@ func Login(db store.IStore) echo.HandlerFunc {
 		dbuser, err := db.GetUserByName(req.Username)
 		if err != nil {
 			log.Warnf("Invalid credentials. Cannot query user %s from DB (%s)", req.Username, ip)
+			// Record failed login attempt
+			RecordFailedLogin(db, ip, req.Username)
 			// Do not leak details about why login failed.
 			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: "Invalid credentials"})
 		}
@@ -156,6 +155,9 @@ func Login(db store.IStore) echo.HandlerFunc {
 		}
 
 		if userCorrect && passwordCorrect {
+			// Clear any failed login attempts on successful login
+			ClearFailedLogins(db, ip)
+
 			var ageMax int
 			if req.RememberMe {
 				ageMax = 86400 * 7
@@ -207,6 +209,9 @@ func Login(db store.IStore) echo.HandlerFunc {
 			log.Infof("Logged in successfully user %s (%s)", req.Username, ip)
 			return c.JSON(http.StatusOK, jsonHTTPResponse{Success: true, Message: "Logged in successfully"})
 		}
+
+		// Record failed login attempt
+		RecordFailedLogin(db, ip, req.Username)
 
 		log.Warnf("Invalid credentials user %s (%s)", req.Username, ip)
 		return c.JSON(http.StatusUnauthorized, jsonHTTPResponse{Success: false, Message: "Invalid credentials"})
@@ -1122,13 +1127,13 @@ func ApplyServerConfig(db store.IStore, tmplDir fs.FS) echo.HandlerFunc {
 			log.Error("Cannot apply server config: ", err)
 			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: fmt.Sprintf("Cannot apply server config: %v", err)})
 		}
-		
+
 		// Reload WireGuard using wg syncconf instead of full restart
 		if err := util.ReloadWireGuard(settings); err != nil {
 			log.Error("Cannot reload WireGuard: ", err)
 			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: fmt.Sprintf("Config written but failed to reload WireGuard: %v", err)})
 		}
-		
+
 		if err := util.UpdateHashes(db); err != nil {
 			log.Error("Cannot update hashes: ", err)
 			return c.JSON(http.StatusInternalServerError, jsonHTTPResponse{Success: false, Message: fmt.Sprintf("Cannot update hashes: %v", err)})

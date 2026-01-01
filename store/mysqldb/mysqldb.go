@@ -160,6 +160,67 @@ func (o *MySQLDB) createTables() error {
 			INDEX idx_api_key_id (api_key_id),
 			INDEX idx_timestamp (timestamp)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+		// Security settings table
+		`CREATE TABLE IF NOT EXISTS security_settings (
+			id INT PRIMARY KEY DEFAULT 1,
+			brute_force_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+			brute_force_max_attempts INT NOT NULL DEFAULT 5,
+			brute_force_window_minutes INT NOT NULL DEFAULT 15,
+			brute_force_block_minutes INT NOT NULL DEFAULT 30,
+			ip_blocking_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+			geoip_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+			geoip_default_action VARCHAR(10) NOT NULL DEFAULT 'allow',
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			CHECK (id = 1)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+		// Security events table
+		`CREATE TABLE IF NOT EXISTS security_events (
+			id VARCHAR(255) PRIMARY KEY,
+			event_type VARCHAR(50) NOT NULL,
+			ip VARCHAR(45) NOT NULL,
+			country VARCHAR(2),
+			username VARCHAR(255),
+			description TEXT NOT NULL,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			INDEX idx_event_type (event_type),
+			INDEX idx_ip (ip),
+			INDEX idx_created_at (created_at)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+		// IP blocks table
+		`CREATE TABLE IF NOT EXISTS ip_blocks (
+			id VARCHAR(255) PRIMARY KEY,
+			ip VARCHAR(45) NOT NULL UNIQUE,
+			reason TEXT,
+			blocked_by VARCHAR(255) NOT NULL,
+			permanent BOOLEAN NOT NULL DEFAULT FALSE,
+			expires_at TIMESTAMP NULL,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			INDEX idx_ip (ip),
+			INDEX idx_expires_at (expires_at)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+		// GeoIP rules table
+		`CREATE TABLE IF NOT EXISTS geoip_rules (
+			id VARCHAR(255) PRIMARY KEY,
+			country_code VARCHAR(2) NOT NULL UNIQUE,
+			country_name VARCHAR(255),
+			action VARCHAR(10) NOT NULL,
+			created_by VARCHAR(255) NOT NULL,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			INDEX idx_country_code (country_code)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+		// Brute force attempts table
+		`CREATE TABLE IF NOT EXISTS brute_force_attempts (
+			ip VARCHAR(45) PRIMARY KEY,
+			attempts INT NOT NULL DEFAULT 0,
+			last_attempt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			blocked_until TIMESTAMP NULL,
+			INDEX idx_blocked_until (blocked_until)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 	}
 
 	for _, query := range queries {
@@ -974,4 +1035,444 @@ func (o *MySQLDB) GetAPIAccessLogsByKeyID(keyID string, limit int) ([]model.APIA
 	}
 
 	return logs, rows.Err()
+}
+
+// Security Management
+
+func (db *MySQLDB) GetSecuritySettings() (model.SecuritySettings, error) {
+	settings := model.SecuritySettings{}
+
+	query := `
+SELECT brute_force_enabled, brute_force_max_attempts, brute_force_window_minutes, 
+       brute_force_block_minutes, ip_blocking_enabled, geoip_enabled, 
+       geoip_default_action, updated_at
+FROM security_settings 
+LIMIT 1
+`
+
+	err := db.conn.QueryRow(query).Scan(
+		&settings.BruteForceEnabled,
+		&settings.BruteForceMaxAttempts,
+		&settings.BruteForceWindowMinutes,
+		&settings.BruteForceBlockMinutes,
+		&settings.IPBlockingEnabled,
+		&settings.GeoIPEnabled,
+		&settings.GeoIPDefaultAction,
+		&settings.UpdatedAt,
+	)
+
+	if err == sql.ErrNoRows {
+		// Return default settings if none exist
+		settings = model.DefaultSecuritySettings()
+		// Save default settings
+		if err := db.SaveSecuritySettings(settings); err != nil {
+			return settings, err
+		}
+		return settings, nil
+	}
+
+	if err != nil {
+		return model.SecuritySettings{}, err
+	}
+
+	return settings, nil
+}
+
+func (db *MySQLDB) SaveSecuritySettings(settings model.SecuritySettings) error {
+	query := `
+INSERT INTO security_settings (
+id, brute_force_enabled, brute_force_max_attempts, brute_force_window_minutes,
+brute_force_block_minutes, ip_blocking_enabled, geoip_enabled,
+geoip_default_action, updated_at
+) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+brute_force_enabled = VALUES(brute_force_enabled),
+brute_force_max_attempts = VALUES(brute_force_max_attempts),
+brute_force_window_minutes = VALUES(brute_force_window_minutes),
+brute_force_block_minutes = VALUES(brute_force_block_minutes),
+ip_blocking_enabled = VALUES(ip_blocking_enabled),
+geoip_enabled = VALUES(geoip_enabled),
+geoip_default_action = VALUES(geoip_default_action),
+updated_at = VALUES(updated_at)
+`
+
+	_, err := db.conn.Exec(query,
+		settings.BruteForceEnabled,
+		settings.BruteForceMaxAttempts,
+		settings.BruteForceWindowMinutes,
+		settings.BruteForceBlockMinutes,
+		settings.IPBlockingEnabled,
+		settings.GeoIPEnabled,
+		settings.GeoIPDefaultAction,
+		settings.UpdatedAt,
+	)
+
+	return err
+}
+
+// Security Events
+
+func (db *MySQLDB) SaveSecurityEvent(event model.SecurityEvent) error {
+	query := `
+INSERT INTO security_events (id, event_type, ip, country, username, description, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+`
+
+	_, err := db.conn.Exec(query,
+		event.ID,
+		event.EventType,
+		event.IP,
+		event.Country,
+		event.Username,
+		event.Description,
+		event.CreatedAt,
+	)
+
+	return err
+}
+
+func (db *MySQLDB) GetSecurityEvents(limit int) ([]model.SecurityEvent, error) {
+	var events []model.SecurityEvent
+
+	query := `
+SELECT id, event_type, ip, COALESCE(country, ''), COALESCE(username, ''), description, created_at
+FROM security_events
+ORDER BY created_at DESC
+`
+
+	if limit > 0 {
+		query += fmt.Sprintf(" LIMIT %d", limit)
+	}
+
+	rows, err := db.conn.Query(query)
+	if err != nil {
+		return events, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		event := model.SecurityEvent{}
+		err := rows.Scan(
+			&event.ID,
+			&event.EventType,
+			&event.IP,
+			&event.Country,
+			&event.Username,
+			&event.Description,
+			&event.CreatedAt,
+		)
+		if err != nil {
+			return events, err
+		}
+		events = append(events, event)
+	}
+
+	return events, rows.Err()
+}
+
+func (db *MySQLDB) GetSecurityEventsByType(eventType string, limit int) ([]model.SecurityEvent, error) {
+	var events []model.SecurityEvent
+
+	query := `
+SELECT id, event_type, ip, COALESCE(country, ''), COALESCE(username, ''), description, created_at
+FROM security_events
+WHERE event_type = ?
+ORDER BY created_at DESC
+`
+
+	if limit > 0 {
+		query += fmt.Sprintf(" LIMIT %d", limit)
+	}
+
+	rows, err := db.conn.Query(query, eventType)
+	if err != nil {
+		return events, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		event := model.SecurityEvent{}
+		err := rows.Scan(
+			&event.ID,
+			&event.EventType,
+			&event.IP,
+			&event.Country,
+			&event.Username,
+			&event.Description,
+			&event.CreatedAt,
+		)
+		if err != nil {
+			return events, err
+		}
+		events = append(events, event)
+	}
+
+	return events, rows.Err()
+}
+
+// IP Blocking
+
+func (db *MySQLDB) GetIPBlocks() ([]model.IPBlock, error) {
+	var blocks []model.IPBlock
+
+	query := `
+SELECT id, ip, COALESCE(reason, ''), blocked_by, permanent, COALESCE(expires_at, '0001-01-01'), created_at
+FROM ip_blocks
+WHERE permanent = 1 OR (expires_at IS NOT NULL AND expires_at > NOW())
+ORDER BY created_at DESC
+`
+
+	rows, err := db.conn.Query(query)
+	if err != nil {
+		return blocks, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		block := model.IPBlock{}
+		err := rows.Scan(
+			&block.ID,
+			&block.IP,
+			&block.Reason,
+			&block.BlockedBy,
+			&block.Permanent,
+			&block.ExpiresAt,
+			&block.CreatedAt,
+		)
+		if err != nil {
+			return blocks, err
+		}
+		blocks = append(blocks, block)
+	}
+
+	return blocks, rows.Err()
+}
+
+func (db *MySQLDB) GetIPBlockByIP(ip string) (model.IPBlock, error) {
+	block := model.IPBlock{}
+
+	query := `
+SELECT id, ip, COALESCE(reason, ''), blocked_by, permanent, COALESCE(expires_at, '0001-01-01'), created_at
+FROM ip_blocks
+WHERE ip = ? AND (permanent = 1 OR (expires_at IS NOT NULL AND expires_at > NOW()))
+LIMIT 1
+`
+
+	err := db.conn.QueryRow(query, ip).Scan(
+		&block.ID,
+		&block.IP,
+		&block.Reason,
+		&block.BlockedBy,
+		&block.Permanent,
+		&block.ExpiresAt,
+		&block.CreatedAt,
+	)
+
+	if err != nil {
+		return model.IPBlock{}, err
+	}
+
+	return block, nil
+}
+
+func (db *MySQLDB) SaveIPBlock(block model.IPBlock) error {
+	query := `
+INSERT INTO ip_blocks (id, ip, reason, blocked_by, permanent, expires_at, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+reason = VALUES(reason),
+permanent = VALUES(permanent),
+expires_at = VALUES(expires_at)
+`
+
+	var expiresAt interface{}
+	if !block.ExpiresAt.IsZero() {
+		expiresAt = block.ExpiresAt
+	}
+
+	_, err := db.conn.Exec(query,
+		block.ID,
+		block.IP,
+		block.Reason,
+		block.BlockedBy,
+		block.Permanent,
+		expiresAt,
+		block.CreatedAt,
+	)
+
+	return err
+}
+
+func (db *MySQLDB) DeleteIPBlock(id string) error {
+	query := `DELETE FROM ip_blocks WHERE id = ?`
+	_, err := db.conn.Exec(query, id)
+	return err
+}
+
+func (db *MySQLDB) IsIPBlocked(ip string) (bool, error) {
+	var count int
+
+	query := `
+SELECT COUNT(*) FROM ip_blocks
+WHERE ip = ? AND (permanent = 1 OR (expires_at IS NOT NULL AND expires_at > NOW()))
+`
+
+	err := db.conn.QueryRow(query, ip).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
+// GeoIP Rules
+
+func (db *MySQLDB) GetGeoIPRules() ([]model.GeoIPRule, error) {
+	var rules []model.GeoIPRule
+
+	query := `
+SELECT id, country_code, COALESCE(country_name, ''), action, created_by, created_at
+FROM geoip_rules
+ORDER BY country_code ASC
+`
+
+	rows, err := db.conn.Query(query)
+	if err != nil {
+		return rules, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		rule := model.GeoIPRule{}
+		err := rows.Scan(
+			&rule.ID,
+			&rule.CountryCode,
+			&rule.CountryName,
+			&rule.Action,
+			&rule.CreatedBy,
+			&rule.CreatedAt,
+		)
+		if err != nil {
+			return rules, err
+		}
+		rules = append(rules, rule)
+	}
+
+	return rules, rows.Err()
+}
+
+func (db *MySQLDB) GetGeoIPRuleByCountry(countryCode string) (model.GeoIPRule, error) {
+	rule := model.GeoIPRule{}
+
+	query := `
+SELECT id, country_code, COALESCE(country_name, ''), action, created_by, created_at
+FROM geoip_rules
+WHERE country_code = ?
+LIMIT 1
+`
+
+	err := db.conn.QueryRow(query, countryCode).Scan(
+		&rule.ID,
+		&rule.CountryCode,
+		&rule.CountryName,
+		&rule.Action,
+		&rule.CreatedBy,
+		&rule.CreatedAt,
+	)
+
+	if err != nil {
+		return model.GeoIPRule{}, err
+	}
+
+	return rule, nil
+}
+
+func (db *MySQLDB) SaveGeoIPRule(rule model.GeoIPRule) error {
+	query := `
+INSERT INTO geoip_rules (id, country_code, country_name, action, created_by, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+country_name = VALUES(country_name),
+action = VALUES(action)
+`
+
+	_, err := db.conn.Exec(query,
+		rule.ID,
+		rule.CountryCode,
+		rule.CountryName,
+		rule.Action,
+		rule.CreatedBy,
+		rule.CreatedAt,
+	)
+
+	return err
+}
+
+func (db *MySQLDB) DeleteGeoIPRule(id string) error {
+	query := `DELETE FROM geoip_rules WHERE id = ?`
+	_, err := db.conn.Exec(query, id)
+	return err
+}
+
+// Brute Force Protection
+
+func (db *MySQLDB) GetBruteForceAttempt(ip string) (model.BruteForceAttempt, error) {
+	attempt := model.BruteForceAttempt{}
+
+	query := `
+SELECT ip, attempts, last_attempt, COALESCE(blocked_until, '0001-01-01')
+FROM brute_force_attempts
+WHERE ip = ?
+LIMIT 1
+`
+
+	err := db.conn.QueryRow(query, ip).Scan(
+		&attempt.IP,
+		&attempt.Attempts,
+		&attempt.LastAttempt,
+		&attempt.BlockedUntil,
+	)
+
+	if err != nil {
+		return model.BruteForceAttempt{}, err
+	}
+
+	return attempt, nil
+}
+
+func (db *MySQLDB) SaveBruteForceAttempt(attempt model.BruteForceAttempt) error {
+	query := `
+INSERT INTO brute_force_attempts (ip, attempts, last_attempt, blocked_until)
+VALUES (?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+attempts = VALUES(attempts),
+last_attempt = VALUES(last_attempt),
+blocked_until = VALUES(blocked_until)
+`
+
+	var blockedUntil interface{}
+	if !attempt.BlockedUntil.IsZero() {
+		blockedUntil = attempt.BlockedUntil
+	}
+
+	_, err := db.conn.Exec(query,
+		attempt.IP,
+		attempt.Attempts,
+		attempt.LastAttempt,
+		blockedUntil,
+	)
+
+	return err
+}
+
+func (db *MySQLDB) DeleteBruteForceAttempt(ip string) error {
+	query := `DELETE FROM brute_force_attempts WHERE ip = ?`
+	_, err := db.conn.Exec(query, ip)
+	return err
+}
+
+func (db *MySQLDB) CleanupExpiredBruteForceAttempts() error {
+	query := `DELETE FROM brute_force_attempts WHERE blocked_until IS NOT NULL AND blocked_until < NOW()`
+	_, err := db.conn.Exec(query)
+	return err
 }

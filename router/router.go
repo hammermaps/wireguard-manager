@@ -37,7 +37,7 @@ func (t *TemplateRegistry) Render(w io.Writer, name string, data interface{}, c 
 			m[k] = v
 		}
 		m["client_defaults"] = util.ClientDefaultsFromEnv()
-		
+
 		// Detect language from cookie or Accept-Language header
 		lang := i18n.DefaultLanguage
 		if cookie, err := c.Cookie("language"); err == nil && cookie.Value != "" {
@@ -46,7 +46,7 @@ func (t *TemplateRegistry) Render(w io.Writer, name string, data interface{}, c 
 			acceptLang := c.Request().Header.Get("Accept-Language")
 			lang = i18n.GetLanguageFromAcceptHeader(acceptLang)
 		}
-		
+
 		// Add translations and current language to template data
 		m["lang"] = lang
 		m["t"] = i18n.GetTranslation(lang)

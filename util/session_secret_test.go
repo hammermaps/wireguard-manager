@@ -66,7 +66,7 @@ func TestGetPersistedSessionSecretWithEnvVar(t *testing.T) {
 func TestGetPersistedSessionSecretEmptyPath(t *testing.T) {
 	// Unset environment variable first
 	os.Unsetenv("SESSION_SECRET")
-	
+
 	// Test with empty path - should use environment variable or default
 	secret := GetPersistedSessionSecret("")
 	if secret == "" {

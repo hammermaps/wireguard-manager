@@ -777,7 +777,7 @@ func GetClientIPFromRequest(remoteAddr string, forwardedFor string, realIP strin
 			return realIP
 		}
 	}
-	
+
 	// Strip port if present
 	if host, _, err := net.SplitHostPort(remoteAddr); err == nil {
 		return host
