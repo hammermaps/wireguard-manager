@@ -28,6 +28,12 @@
     {{template "top_css" .}}
     <!-- END: On page css -->
     <style>
+        /* Prevent flash of unstyled content - default to dark mode until JS loads */
+        body:not(.light-mode):not(.dark-mode) {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        
         /* Base Dark Mode Styles */
         body.dark-mode, body.dark-mode .content-wrapper {
             background-color: #121212;
@@ -237,7 +243,7 @@
     </style>
 </head>
 
-<body class="hold-transition sidebar-mini dark-mode">
+<body class="hold-transition sidebar-mini">
     <!-- Site wrapper -->
     <div class="wrapper">
         <!-- Navbar -->
@@ -591,6 +597,11 @@
         }
 
         function setTheme(theme, save = true) {
+            // Validate theme parameter - only allow 'light' or 'dark'
+            if (theme !== 'light' && theme !== 'dark') {
+                theme = 'dark'; // Default to dark mode if invalid
+            }
+            
             const body = document.body;
             const themeLabels = {
                 'light': '{{tr .t "nav.theme_light"}}',
@@ -600,13 +611,13 @@
             // Remove both theme classes first
             body.classList.remove('light-mode', 'dark-mode');
             
-            // Add the selected theme class
+            // Add the selected theme class (now validated)
             body.classList.add(theme + '-mode');
             
             // Update the dropdown text
             const currentThemeEl = document.getElementById('current-theme');
             if (currentThemeEl) {
-                currentThemeEl.textContent = themeLabels[theme] || themeLabels['dark'];
+                currentThemeEl.textContent = themeLabels[theme];
             }
             
             // Save to localStorage if requested
