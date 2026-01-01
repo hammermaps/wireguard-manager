@@ -145,6 +145,14 @@ func New(tmplDir fs.FS, extraData map[string]interface{}, secret [64]byte) *echo
 	if err != nil {
 		log.Fatal(err)
 	}
+	tmplSecuritySettingsString, err := util.StringFromEmbedFile(tmplDir, "security_settings.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	tmplSecurityStatisticsString, err := util.StringFromEmbedFile(tmplDir, "security_statistics.html")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create a function map for templates.
 	funcs := template.FuncMap{
@@ -177,15 +185,17 @@ func New(tmplDir fs.FS, extraData map[string]interface{}, secret [64]byte) *echo
 
 	// Build the map of templates.
 	templates := map[string]*template.Template{
-		"login.html":           template.Must(template.New("login").Funcs(funcs).Parse(tmplLoginString)),
-		"profile.html":         template.Must(template.New("profile").Funcs(funcs).Parse(tmplBaseString + tmplProfileString)),
-		"clients.html":         template.Must(template.New("clients").Funcs(funcs).Parse(tmplBaseString + tmplClientsString)),
-		"server.html":          template.Must(template.New("server").Funcs(funcs).Parse(tmplBaseString + tmplServerString)),
-		"global_settings.html": template.Must(template.New("global_settings").Funcs(funcs).Parse(tmplBaseString + tmplGlobalSettingsString)),
-		"users_settings.html":  template.Must(template.New("users_settings").Funcs(funcs).Parse(tmplBaseString + tmplUsersSettingsString)),
-		"status.html":          template.Must(template.New("status").Funcs(funcs).Parse(tmplBaseString + tmplStatusString)),
-		"api_keys.html":        template.Must(template.New("api_keys").Funcs(funcs).Parse(tmplBaseString + tmplAPIKeysString)),
-		"api_statistics.html":  template.Must(template.New("api_statistics").Funcs(funcs).Parse(tmplBaseString + tmplAPIStatisticsString)),
+		"login.html":              template.Must(template.New("login").Funcs(funcs).Parse(tmplLoginString)),
+		"profile.html":            template.Must(template.New("profile").Funcs(funcs).Parse(tmplBaseString + tmplProfileString)),
+		"clients.html":            template.Must(template.New("clients").Funcs(funcs).Parse(tmplBaseString + tmplClientsString)),
+		"server.html":             template.Must(template.New("server").Funcs(funcs).Parse(tmplBaseString + tmplServerString)),
+		"global_settings.html":    template.Must(template.New("global_settings").Funcs(funcs).Parse(tmplBaseString + tmplGlobalSettingsString)),
+		"users_settings.html":     template.Must(template.New("users_settings").Funcs(funcs).Parse(tmplBaseString + tmplUsersSettingsString)),
+		"status.html":             template.Must(template.New("status").Funcs(funcs).Parse(tmplBaseString + tmplStatusString)),
+		"api_keys.html":           template.Must(template.New("api_keys").Funcs(funcs).Parse(tmplBaseString + tmplAPIKeysString)),
+		"api_statistics.html":     template.Must(template.New("api_statistics").Funcs(funcs).Parse(tmplBaseString + tmplAPIStatisticsString)),
+		"security_settings.html":  template.Must(template.New("security_settings").Funcs(funcs).Parse(tmplBaseString + tmplSecuritySettingsString)),
+		"security_statistics.html": template.Must(template.New("security_statistics").Funcs(funcs).Parse(tmplBaseString + tmplSecurityStatisticsString)),
 	}
 
 	// Parse the log level from environment (default INFO).
