@@ -214,9 +214,10 @@ function updateTransferChart() {
   // Prepare data for the chart - show top 10 clients by total transfer
   const sortedData = [...statsData].sort((a, b) => b.total - a.total).slice(0, 10);
   
+  const BYTES_PER_MB = 1024 * 1024;
   const labels = sortedData.map(c => c.name);
-  const receivedData = sortedData.map(c => (c.received / 1024 / 1024).toFixed(2)); // Convert to MB
-  const transmittedData = sortedData.map(c => (c.transmitted / 1024 / 1024).toFixed(2)); // Convert to MB
+  const receivedData = sortedData.map(c => (c.received / BYTES_PER_MB).toFixed(2));
+  const transmittedData = sortedData.map(c => (c.transmitted / BYTES_PER_MB).toFixed(2));
 
   // Destroy existing chart if it exists
   if (transferChart) {
@@ -399,5 +400,5 @@ function escapeHtml(text) {
 {{end}}
 
 {{define "bottom_js"}}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js" integrity="sha256-+8RZJua0aEWg+QVVKg4LEzEEm/8RFez5Tb4JBNiV5xA=" crossorigin="anonymous"></script>
 {{end}}
