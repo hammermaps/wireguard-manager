@@ -7,8 +7,14 @@
     <title>{{template "title" .}}</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <!-- Favicon -->
-    <link rel="icon" href="{{.basePath}}/favicon">
+    <link rel="icon" type="image/png" href="{{.basePath}}/static/custom/img/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{.basePath}}/static/custom/img/favicon.svg" />
+    <link rel="shortcut icon" href="{{.basePath}}/static/custom/img/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{.basePath}}/static/custom/img/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="WireGuard Manager" />
+    <link rel="manifest" href="{{.basePath}}/static/custom/img/site.webmanifest" />
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{.basePath}}/static/plugins/fontawesome-free/css/all.min.css">
@@ -315,8 +321,8 @@
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
-            <a href="{{.basePath}}" class="brand-link">
-                <span class="brand-text">&nbsp; {{tr .t "brand_title"}}</span>
+            <a href="{{.basePath}}" class="brand-link" style="display: flex; align-items: center; justify-content: center; height: 7.0rem; padding: 0.5rem;">
+                <img src="{{.basePath}}/static/custom/img/logo.png" alt="WireGuard Manager" class="brand-image elevation-3" style="max-height: 5.5rem; max-width: 100%; height: auto; width: auto; object-fit: contain;">
             </a>
 
             <!-- Sidebar -->

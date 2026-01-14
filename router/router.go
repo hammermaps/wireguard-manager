@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/swissmakers/wireguard-manager/handler"
 	"github.com/swissmakers/wireguard-manager/i18n"
 	"github.com/swissmakers/wireguard-manager/util"
 )
@@ -205,6 +206,9 @@ func New(tmplDir fs.FS, extraData map[string]interface{}, secret [64]byte) *echo
 		"security_settings.html":   template.Must(template.New("security_settings").Funcs(funcs).Parse(tmplBaseString + tmplSecuritySettingsString)),
 		"security_statistics.html": template.Must(template.New("security_statistics").Funcs(funcs).Parse(tmplBaseString + tmplSecurityStatisticsString)),
 	}
+
+	// Register GeoIP middleware
+	handler.RegisterMiddlewares(e, "GeoLite2-City.mmdb")
 
 	// Parse the log level from environment (default INFO).
 	lvl, err := util.ParseLogLevel(util.LookupEnvOrString(util.LogLevel, "INFO"))

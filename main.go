@@ -233,6 +233,9 @@ func main() {
 	// Initialize the Echo router using our optimized router.New.
 	app := router.New(tmplDir, extraData, util.SessionSecret)
 
+	// Register GeoIP middleware
+	handler.RegisterMiddlewares(app, "GeoLite2-City.mmdb")
+
 	// Add security middleware (should be early in the chain)
 	app.Use(handler.SecurityMiddleware(db))
 
@@ -372,6 +375,9 @@ func main() {
 	assetHandler := http.FileServer(http.FS(assetsDir))
 	app.GET(util.BasePath+"/static/*", echo.WrapHandler(http.StripPrefix(util.BasePath+"/static/", assetHandler)))
 
+	// Initialize GeoIP database
+	initGeoIPDatabase()
+
 	// Listen on the appropriate socket.
 	if strings.HasPrefix(util.BindAddress, "unix://") {
 		// For Unix domain sockets.
@@ -420,4 +426,19 @@ func initServerConfig(db store.IStore, tmplDir fs.FS) {
 	if err := util.WriteWireGuardServerConfig(tmplDir, server, clients, users, settings); err != nil {
 		log.Fatalf("Cannot create server config: %v", err)
 	}
+}
+
+// Ensure the resource is closed properly in initGeoIPDatabase
+func initGeoIPDatabase() {
+	dbPath := "GeoLite2-City.mmdb"
+	mmdb, err := handler.LoadGeoLite2CityDB(dbPath)
+	if err != nil {
+		log.Fatalf("Failed to load GeoLite2-City.mmdb: %v", err)
+	}
+	defer func() {
+		if cerr := mmdb.Close(); cerr != nil {
+			log.Warnf("Failed to close GeoLite2-City.mmdb: %v", cerr)
+		}
+	}()
+	log.Infof("GeoLite2-City.mmdb successfully loaded")
 }
