@@ -17,6 +17,9 @@
     "api": "API",
     "api_key_management": "API-Schlüsselverwaltung",
     "api_statistics": "API-Statistiken",
+    "security": "SICHERHEIT",
+    "security_settings": "Sicherheitseinstellungen",
+    "security_statistics": "Sicherheitsstatistiken",
     "theme_light": "Hell",
     "theme_dark": "Dunkel"
   },

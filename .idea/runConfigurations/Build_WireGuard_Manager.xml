@@ -3,6 +3,7 @@
     <module name="wireguard-manager" />
     <working_directory value="$PROJECT_DIR$" />
     <go_parameters value="-ldflags=&quot;-X 'main.appVersion=dev' -X 'main.gitCommit=local' -X 'main.gitRef=refs/heads/local' -X 'main.buildTime=development-build'&quot;" />
+    <sudo value="true" />
     <kind value="PACKAGE" />
     <package value="github.com/swissmakers/wireguard-manager" />
     <directory value="$PROJECT_DIR$" />

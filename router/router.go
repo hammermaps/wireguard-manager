@@ -49,7 +49,10 @@ func (t *TemplateRegistry) Render(w io.Writer, name string, data interface{}, c 
 
 		// Add translations and current language to template data
 		m["lang"] = lang
-		m["t"] = i18n.GetTranslation(lang)
+		translation := i18n.GetTranslation(lang)
+		m["t"] = translation
+
+		log.Debugf("Rendering template %s with language %s (translation keys: %d)", name, lang, len(translation))
 	}
 
 	// For the login page, no base layout is needed.
@@ -169,15 +172,20 @@ func New(tmplDir fs.FS, extraData map[string]interface{}, secret [64]byte) *echo
 						if val, exists := m[k]; exists {
 							current = val
 						} else {
+							log.Debugf("Translation key not found: %s (missing key: %s)", key, k)
 							return key // Key not found, return the key path as fallback
 						}
 					} else {
+						log.Debugf("Translation structure error for key: %s (not a map at: %s)", key, k)
 						return key // Not a map, return the key path as fallback
 					}
 				}
 				if str, ok := current.(string); ok {
 					return str
 				}
+				log.Debugf("Translation value is not a string for key: %s", key)
+			} else {
+				log.Debugf("Translation object is not valid for key: %s (type: %T)", key, t)
 			}
 			return key
 		},
@@ -185,16 +193,16 @@ func New(tmplDir fs.FS, extraData map[string]interface{}, secret [64]byte) *echo
 
 	// Build the map of templates.
 	templates := map[string]*template.Template{
-		"login.html":              template.Must(template.New("login").Funcs(funcs).Parse(tmplLoginString)),
-		"profile.html":            template.Must(template.New("profile").Funcs(funcs).Parse(tmplBaseString + tmplProfileString)),
-		"clients.html":            template.Must(template.New("clients").Funcs(funcs).Parse(tmplBaseString + tmplClientsString)),
-		"server.html":             template.Must(template.New("server").Funcs(funcs).Parse(tmplBaseString + tmplServerString)),
-		"global_settings.html":    template.Must(template.New("global_settings").Funcs(funcs).Parse(tmplBaseString + tmplGlobalSettingsString)),
-		"users_settings.html":     template.Must(template.New("users_settings").Funcs(funcs).Parse(tmplBaseString + tmplUsersSettingsString)),
-		"status.html":             template.Must(template.New("status").Funcs(funcs).Parse(tmplBaseString + tmplStatusString)),
-		"api_keys.html":           template.Must(template.New("api_keys").Funcs(funcs).Parse(tmplBaseString + tmplAPIKeysString)),
-		"api_statistics.html":     template.Must(template.New("api_statistics").Funcs(funcs).Parse(tmplBaseString + tmplAPIStatisticsString)),
-		"security_settings.html":  template.Must(template.New("security_settings").Funcs(funcs).Parse(tmplBaseString + tmplSecuritySettingsString)),
+		"login.html":               template.Must(template.New("login").Funcs(funcs).Parse(tmplLoginString)),
+		"profile.html":             template.Must(template.New("profile").Funcs(funcs).Parse(tmplBaseString + tmplProfileString)),
+		"clients.html":             template.Must(template.New("clients").Funcs(funcs).Parse(tmplBaseString + tmplClientsString)),
+		"server.html":              template.Must(template.New("server").Funcs(funcs).Parse(tmplBaseString + tmplServerString)),
+		"global_settings.html":     template.Must(template.New("global_settings").Funcs(funcs).Parse(tmplBaseString + tmplGlobalSettingsString)),
+		"users_settings.html":      template.Must(template.New("users_settings").Funcs(funcs).Parse(tmplBaseString + tmplUsersSettingsString)),
+		"status.html":              template.Must(template.New("status").Funcs(funcs).Parse(tmplBaseString + tmplStatusString)),
+		"api_keys.html":            template.Must(template.New("api_keys").Funcs(funcs).Parse(tmplBaseString + tmplAPIKeysString)),
+		"api_statistics.html":      template.Must(template.New("api_statistics").Funcs(funcs).Parse(tmplBaseString + tmplAPIStatisticsString)),
+		"security_settings.html":   template.Must(template.New("security_settings").Funcs(funcs).Parse(tmplBaseString + tmplSecuritySettingsString)),
 		"security_statistics.html": template.Must(template.New("security_statistics").Funcs(funcs).Parse(tmplBaseString + tmplSecurityStatisticsString)),
 	}
 

@@ -3,6 +3,10 @@ set -e
 
 DIR=$(dirname "$0")
 
+# Source NVM if available to ensure correct Node.js version
+[ -s "$HOME/.nvm/nvm.sh" ] && source "$HOME/.nvm/nvm.sh"
+[ -s "$HOME/.nvm/bash_completion" ] && source "$HOME/.nvm/bash_completion"
+
 # install node modules
 YARN=yarn
 [ -x /usr/bin/lsb_release ] && [ -n "`lsb_release -i | grep Debian`" ] && YARN=yarnpkg

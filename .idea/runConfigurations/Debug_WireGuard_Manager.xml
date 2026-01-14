@@ -8,6 +8,7 @@
       <env name="WGUI_SERVER_INTERFACE_ADDRESSES" value="10.252.1.0/24" />
       <env name="WGUI_SERVER_LISTEN_PORT" value="51820" />
     </envs>
+    <sudo value="true" />
     <kind value="PACKAGE" />
     <package value="github.com/swissmakers/wireguard-manager" />
     <directory value="$PROJECT_DIR$" />
