@@ -5,7 +5,9 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/fs"
+	"mime"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"sort"
@@ -100,12 +102,19 @@ func SetLanguage() echo.HandlerFunc {
 		}
 		c.SetCookie(cookie)
 
-		// Redirect back to the referring page or home
+		// Redirect back to the referring page, but only if it belongs to the
+		// same host as the current request (guard against open-redirect attacks).
 		referer := c.Request().Header.Get("Referer")
-		if referer == "" {
-			referer = util.BasePath + "/"
+		safeRedirect := util.BasePath + "/"
+		if referer != "" {
+			if ref, err := url.Parse(referer); err == nil {
+				reqHost := c.Request().Host
+				if ref.Host == "" || ref.Host == reqHost {
+					safeRedirect = referer
+				}
+			}
 		}
-		return c.Redirect(http.StatusFound, referer)
+		return c.Redirect(http.StatusFound, safeRedirect)
 	}
 }
 
@@ -780,7 +789,13 @@ func DownloadClient(db store.IStore) echo.HandlerFunc {
 		}
 		config := util.BuildClientConfig(*clientData.Client, server, globalSettings)
 		reader := strings.NewReader(config)
-		c.Response().Header().Set(echo.HeaderContentDisposition, fmt.Sprintf("attachment; filename=%s.conf", clientData.Client.Email))
+		// Use mime.FormatMediaType to safely encode the filename and prevent
+		// HTTP header injection via a client e-mail address that contains
+		// special characters (quotes, semicolons, newlines, …).
+		contentDisposition := mime.FormatMediaType("attachment", map[string]string{
+			"filename": clientData.Client.Email + ".conf",
+		})
+		c.Response().Header().Set(echo.HeaderContentDisposition, contentDisposition)
 		return c.Stream(http.StatusOK, "text/conf", reader)
 	}
 }
