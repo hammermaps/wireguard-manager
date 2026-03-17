@@ -143,8 +143,6 @@ func init() {
 	util.EmailFromName = flagEmailFromName
 	// Use a stable session secret.
 	util.SessionSecret = sha512.Sum512([]byte(flagSessionSecret))
-	// DEBUG: Log the session secret hash for verification (remove in production)
-	log.Debugf("Using session secret (SHA512 hash): %x", util.SessionSecret)
 	util.SessionMaxDuration = int64(flagSessionMaxDuration) * 86_400 // store in seconds
 	util.WgConfTemplate = flagWgConfTemplate
 	util.BasePath = util.ParseBasePath(flagBasePath)
@@ -234,7 +232,7 @@ func main() {
 	app := router.New(tmplDir, extraData, util.SessionSecret)
 
 	// Register GeoIP middleware
-	handler.RegisterMiddlewares(app, "GeoLite2-City.mmdb")
+	handler.RegisterMiddlewares(app, "GeoLite2-City.mmdb", db)
 
 	// Add security middleware (should be early in the chain)
 	app.Use(handler.SecurityMiddleware(db))
@@ -375,9 +373,6 @@ func main() {
 	assetHandler := http.FileServer(http.FS(assetsDir))
 	app.GET(util.BasePath+"/static/*", echo.WrapHandler(http.StripPrefix(util.BasePath+"/static/", assetHandler)))
 
-	// Initialize GeoIP database
-	initGeoIPDatabase()
-
 	// Listen on the appropriate socket.
 	if strings.HasPrefix(util.BindAddress, "unix://") {
 		// For Unix domain sockets.
@@ -428,17 +423,3 @@ func initServerConfig(db store.IStore, tmplDir fs.FS) {
 	}
 }
 
-// Ensure the resource is closed properly in initGeoIPDatabase
-func initGeoIPDatabase() {
-	dbPath := "GeoLite2-City.mmdb"
-	mmdb, err := handler.LoadGeoLite2CityDB(dbPath)
-	if err != nil {
-		log.Fatalf("Failed to load GeoLite2-City.mmdb: %v", err)
-	}
-	defer func() {
-		if cerr := mmdb.Close(); cerr != nil {
-			log.Warnf("Failed to close GeoLite2-City.mmdb: %v", cerr)
-		}
-	}()
-	log.Infof("GeoLite2-City.mmdb successfully loaded")
-}

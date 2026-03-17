@@ -274,6 +274,13 @@ func CreateIPBlock(db store.IStore) echo.HandlerFunc {
 			})
 		}
 
+		if net.ParseIP(req.IP) == nil {
+			return c.JSON(http.StatusBadRequest, jsonHTTPResponse{
+				Success: false,
+				Message: "Invalid IP address format",
+			})
+		}
+
 		block := model.IPBlock{
 			ID:        xid.New().String(),
 			IP:        req.IP,
@@ -577,127 +584,89 @@ func UnzipGeoLite2CityDB(src, dest string) error {
 	return nil
 }
 
-// Ensure GeoIPMiddleware is used in the application
-func RegisterMiddlewares(e *echo.Echo, dbPath string) {
-	e.Use(GeoIPMiddleware(dbPath))
+// RegisterMiddlewares registers GeoIP middleware (if the database file is present)
+// and the store-aware security middleware on the given Echo instance.
+// The GeoIP middleware is optional: if the database file does not exist it is
+// silently skipped so that the application remains reachable.
+func RegisterMiddlewares(e *echo.Echo, dbPath string, db store.IStore) {
+	e.Use(GeoIPMiddleware(dbPath, db))
 }
 
-// Check if GeoLite2-City.mmdb exists, and download it if not
-func EnsureGeoLite2CityDBExists() error {
-	dbPath := "GeoLite2-City.mmdb"
-	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
-		log.Infof("GeoLite2-City.mmdb not found. Downloading...")
-		if err := DownloadGeoLite2CityDB(); err != nil {
-			return fmt.Errorf("failed to ensure GeoLite2-City.mmdb exists: %v", err)
-		}
-	}
-	return nil
-}
-
-// Modify GeoIPMiddleware to ensure the database exists before activation
-func GeoIPMiddleware(dbPath string) echo.MiddlewareFunc {
-	if err := EnsureGeoLite2CityDBExists(); err != nil {
-		log.Errorf("GeoIPMiddleware initialization failed: %v", err)
+// GeoIPMiddleware opens the MaxMind GeoLite2 database once at initialisation
+// and then, for every request, looks up the client country and enforces the
+// GeoIP rules stored in the database.  If the database file is absent the
+// middleware is a no-op so the application continues to work without a GeoIP
+// database.
+func GeoIPMiddleware(dbPath string, db store.IStore) echo.MiddlewareFunc {
+	mmdb, err := maxminddb.Open(dbPath)
+	if err != nil {
+		// DB not available – log a warning and return a pass-through middleware.
+		log.Warnf("GeoIP database not available (%v); GeoIP filtering disabled", err)
 		return func(next echo.HandlerFunc) echo.HandlerFunc {
 			return func(c echo.Context) error {
-				return c.JSON(http.StatusInternalServerError, map[string]string{"message": "GeoIP database unavailable."})
+				return next(c)
 			}
 		}
 	}
+	log.Infof("GeoIP database loaded from %s", dbPath)
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			mmdb, err := maxminddb.Open(dbPath)
-			if err != nil {
-				return fmt.Errorf("failed to open GeoLite2-City.mmdb: %v", err)
+			// Skip the health-check endpoint.
+			if c.Path() == util.BasePath+"/_health" {
+				return next(c)
 			}
-			defer func() {
-				if cerr := mmdb.Close(); cerr != nil {
-					log.Warnf("Failed to close maxminddb: %v", cerr)
-				}
-			}()
 
 			ip := net.ParseIP(util.GetRealIP(c))
+			if ip == nil {
+				return next(c)
+			}
+
 			var record struct {
 				Country struct {
 					ISOCode string `maxminddb:"iso_code"`
 				} `maxminddb:"country"`
 			}
 			if err := mmdb.Lookup(ip, &record); err != nil {
-				return fmt.Errorf("failed to lookup IP: %v", err)
+				log.Warnf("GeoIP lookup failed for %s: %v", ip, err)
+				return next(c)
 			}
 
-			// Example: Block all requests from a specific country
-			if record.Country.ISOCode == "CN" {
-				return c.JSON(http.StatusForbidden, map[string]string{"message": "Access denied from your region."})
+			countryCode := record.Country.ISOCode
+			if countryCode == "" {
+				return next(c)
 			}
 
-			return next(c)
-		}
-	}
-}
-
-// NewGeoIPMiddleware checks if the client IP belongs to a blocked country
-func NewGeoIPMiddleware(dbPath string) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			// Extract client IP from the request
-			clientIP := c.RealIP()
-
-			// Open the GeoLite2 database
-			db, err := maxminddb.Open(dbPath)
+			// Enforce the GeoIP rules stored in the database.
+			rules, err := db.GetGeoIPRules()
 			if err != nil {
-				log.Errorf("Failed to open GeoLite2 database: %v", err)
-				return echo.NewHTTPError(http.StatusInternalServerError, "GeoIP database error")
-			}
-			defer db.Close()
-
-			// Parse the client IP
-			ip := net.ParseIP(clientIP)
-			if ip == nil {
-				log.Warnf("Invalid client IP: %s", clientIP)
-				return echo.NewHTTPError(http.StatusBadRequest, "Invalid client IP")
+				log.Warnf("Failed to load GeoIP rules: %v", err)
+				return next(c)
 			}
 
-			// Query the GeoLite2 database for the country
-			var record struct {
-				Country struct {
-					ISOCode string `maxminddb:"iso_code"`
-				} `maxminddb:"country"`
-			}
-			if err := db.Lookup(ip, &record); err != nil {
-				log.Errorf("Failed to lookup IP in GeoLite2 database: %v", err)
-				return echo.NewHTTPError(http.StatusInternalServerError, "GeoIP lookup error")
-			}
-
-			// Check if the country is blocked
-			blockedCountries := []string{"CN", "RU", "IR"} // Example blocked countries
-			for _, blocked := range blockedCountries {
-				if record.Country.ISOCode == blocked {
-					log.Infof("Blocked client IP %s from country %s", clientIP, record.Country.ISOCode)
-					return echo.NewHTTPError(http.StatusForbidden, "Access from your country is restricted")
+			for _, rule := range rules {
+				if rule.CountryCode != countryCode {
+					continue
 				}
+				if rule.Action == "block" {
+					event := model.SecurityEvent{
+						ID:          xid.New().String(),
+						EventType:   "blocked_geoip",
+						IP:          util.GetRealIP(c),
+						Description: fmt.Sprintf("GeoIP block: country %s (%s) attempted to access %s", countryCode, rule.CountryName, c.Request().URL.Path),
+						CreatedAt:   time.Now().UTC(),
+					}
+					_ = db.SaveSecurityEvent(event)
+					return c.JSON(http.StatusForbidden, jsonHTTPResponse{
+						Success: false,
+						Message: "Access denied from your region.",
+					})
+				}
+				// Action "allow" – explicitly permitted, skip remaining rules.
+				break
 			}
 
-			// Proceed to the next handler
 			return next(c)
 		}
 	}
-}
-
-// Load the GeoLite2-City.mmdb database for use
-func LoadGeoLite2CityDB(dbPath string) (*maxminddb.Reader, error) {
-	log.Infof("Loading GeoLite2-City.mmdb from %s", dbPath)
-	mmdb, err := maxminddb.Open(dbPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load GeoLite2-City.mmdb: %w", err)
-	}
-	// Ensure the resource is closed properly
-	defer func() {
-		if cerr := mmdb.Close(); cerr != nil {
-			log.Warnf("Failed to close GeoLite2-City.mmdb: %v", cerr)
-		}
-	}()
-	log.Infof("Successfully loaded GeoLite2-City.mmdb")
-	return mmdb, nil
 }
