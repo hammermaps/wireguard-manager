@@ -1,18 +1,48 @@
 {
+  "id": "/",
   "name": "WireGuard Manager",
   "short_name": "WGM",
+  "start_url": "/",
+  "scope": "/",
   "icons": [
     {
-      "src": "/web-app-manifest-192x192.png",
+      "src": "web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/web-app-manifest-512x512.png",
+      "src": "web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-wide.png",
+      "sizes": "1862x904",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "WireGuard Manager Dashboard"
+    },
+    {
+      "src": "screenshot-mobile.png",
+      "sizes": "1862x904",
+      "type": "image/png",
+      "label": "WireGuard Manager Client Stats"
     }
   ],
   "theme_color": "#ffffff",
