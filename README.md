@@ -115,30 +115,31 @@ Below is a step-by-step guide demonstrating how to set up `wireguard-manager` **
    ```bash
    vim /opt/wireguard_environment.conf
    ```
-   Sample contents:
-   ```ini
-   BASE_PATH="/"
-   BIND_ADDRESS="0.0.0.0:5000"
-   SESSION_SECRET="**********************************"
-   WGM_USERNAME="admin"
-   WGM_PASSWORD="**********************************"
-   WGM_ENDPOINT_ADDRESS="vpn.example.com"
-   WGM_DNS="8.8.8.8"
-   WGM_MTU="1450"
-   WGM_PERSISTENT_KEEPALIVE="15"
-   WGM_CONFIG_FILE_PATH="/etc/wireguard/wg0.conf"
-   # WGM_LOG_LEVEL="DEBUG"
-   # WG_CONF_TEMPLATE=
-   EMAIL_FROM_ADDRESS=noreply@example.com
-   EMAIL_FROM_NAME=noreply
-   # SENDGRID_API_KEY=
-   SMTP_HOSTNAME=smtp.office365.com
-   SMTP_PORT=587
-   SMTP_USERNAME=noreply@example.com
-   SMTP_PASSWORD="**********************************"
-   SMTP_AUTH_TYPE=LOGIN
-   SMTP_ENCRYPTION=STARTTLS
-   ```
+    Sample contents:
+    ```ini
+    BASE_PATH="/"
+    BIND_ADDRESS="0.0.0.0:5000"
+    PROXY=true
+    SESSION_SECRET="**********************************"
+    WGM_USERNAME="admin"
+    WGM_PASSWORD="**********************************"
+    WGM_ENDPOINT_ADDRESS="vpn.example.com"
+    WGM_DNS="8.8.8.8"
+    WGM_MTU="1450"
+    WGM_PERSISTENT_KEEPALIVE="15"
+    WGM_CONFIG_FILE_PATH="/etc/wireguard/wg0.conf"
+    # WGM_LOG_LEVEL="DEBUG"
+    # WG_CONF_TEMPLATE=
+    EMAIL_FROM_ADDRESS=noreply@example.com
+    EMAIL_FROM_NAME=noreply
+    # SENDGRID_API_KEY=
+    SMTP_HOSTNAME=smtp.office365.com
+    SMTP_PORT=587
+    SMTP_USERNAME=noreply@example.com
+    SMTP_PASSWORD="**********************************"
+    SMTP_AUTH_TYPE=LOGIN
+    SMTP_ENCRYPTION=STARTTLS
+    ```
 
 9. **Create the systemd service unit for `wireguard-manager`**:
    ```bash
