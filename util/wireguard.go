@@ -1,7 +1,9 @@
 package util
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -36,17 +38,17 @@ func GetWireGuardInterface(configPath string) string {
 func ReloadWireGuard(settings model.GlobalSetting) error {
 	interfaceName := GetWireGuardInterface(settings.ConfigFilePath)
 
-	// First, strip the wg-quick specific directives from the config
-	stripCmd := exec.Command("wg-quick", "strip", interfaceName)
-	stripOutput, err := stripCmd.Output()
+	// Strip wg-quick-specific directives from the config file directly,
+	// avoiding the need to call `wg-quick strip` which requires root/sudo.
+	stripped, err := stripWGQuickConfig(settings.ConfigFilePath)
 	if err != nil {
-		log.Errorf("Failed to strip config for interface %s: %v", interfaceName, err)
+		log.Errorf("Failed to strip config from %s: %v", settings.ConfigFilePath, err)
 		return fmt.Errorf("failed to strip config: %w", err)
 	}
 
-	// Now apply the stripped config using wg syncconf
+	// Apply the stripped config using wg syncconf
 	syncCmd := exec.Command("wg", "syncconf", interfaceName, "/dev/stdin")
-	syncCmd.Stdin = strings.NewReader(string(stripOutput))
+	syncCmd.Stdin = strings.NewReader(stripped)
 
 	output, err := syncCmd.CombinedOutput()
 	if err != nil {
@@ -56,6 +58,57 @@ func ReloadWireGuard(settings model.GlobalSetting) error {
 
 	log.Infof("Successfully reloaded WireGuard interface %s", interfaceName)
 	return nil
+}
+
+// stripWGQuickConfig reads a wg-quick config file and removes wg-quick-specific
+// directives, returning only the lines that `wg syncconf` understands.
+// This replicates the behavior of `wg-quick strip` without requiring root.
+func stripWGQuickConfig(configPath string) (string, error) {
+	file, err := os.Open(configPath)
+	if err != nil {
+		return "", fmt.Errorf("cannot open config file %s: %w", configPath, err)
+	}
+	defer file.Close()
+
+	// Keys that are wg-quick-specific and should be stripped.
+	wgQuickKeys := map[string]bool{
+		"Address":     true,
+		"DNS":         true,
+		"MTU":         true,
+		"Table":       true,
+		"PreUp":       true,
+		"PostUp":      true,
+		"PreDown":     true,
+		"PostDown":    true,
+		"SaveConfig":  true,
+	}
+
+	var result strings.Builder
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		stripped := strings.TrimSpace(line)
+
+		// Keep comments, empty lines, and section headers.
+		if stripped == "" || strings.HasPrefix(stripped, "#") || strings.HasPrefix(stripped, "[") {
+			result.WriteString(line)
+			result.WriteString("\n")
+			continue
+		}
+
+		// Extract the key (everything before the first '=').
+		key := strings.TrimSpace(strings.SplitN(stripped, "=", 2)[0])
+		if !wgQuickKeys[key] {
+			result.WriteString(line)
+			result.WriteString("\n")
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return "", fmt.Errorf("error reading config file: %w", err)
+	}
+
+	return result.String(), nil
 }
 
 // StartWireGuard starts the WireGuard interface
