@@ -944,6 +944,36 @@
     <!-- START: On page script -->
     {{template "bottom_js" .}}
     <!-- END: On page script -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('{{.basePath}}/static/custom/js/sw.js', {
+                    scope: '{{.basePath}}/'
+                }).then(function(registration) {
+                    console.log('ServiceWorker registered with scope:', registration.scope);
+                    registration.addEventListener('updatefound', function() {
+                        const newWorker = registration.installing;
+                        if (newWorker) {
+                            newWorker.addEventListener('statechange', function() {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                }
+                            });
+                        }
+                    });
+                }).catch(function(err) {
+                    console.warn('ServiceWorker registration failed:', err);
+                });
+
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', function() {
+                    if (refreshing) return;
+                    refreshing = true;
+                    window.location.reload();
+                });
+            });
+        }
+    </script>
 </body>
 
 </html>

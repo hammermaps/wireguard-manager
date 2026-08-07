@@ -39,3 +39,4 @@ templates/_dev/
 
 # Session secrets and sensitive config
 util/db/
+wireguard-manager.bak

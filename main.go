@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 	"syscall"
 	"time"
@@ -365,13 +366,51 @@ func main() {
 	apiGroup.DELETE("/client/:id", handler.RemoveClient(db), handler.ContentTypeJson, handler.CheckAPIPermission(model.PermissionWriteClients))
 	apiGroup.POST("/group/set-status", handler.SetGroupStatus(db), handler.ContentTypeJson, handler.CheckAPIPermission(model.PermissionManageGroups))
 
-	// Serve static files from the embedded assets.
+	// Serve static files from the embedded assets with custom headers.
 	assetsDir, err := fs.Sub(embeddedAssets, "assets")
 	if err != nil {
 		log.Fatalf("Error processing assets: %v", err)
 	}
 	assetHandler := http.FileServer(http.FS(assetsDir))
-	app.GET(util.BasePath+"/static/*", echo.WrapHandler(http.StripPrefix(util.BasePath+"/static/", assetHandler)))
+	staticPrefix := util.BasePath + "/static/"
+	app.GET(util.BasePath+"/static/*", echo.WrapHandler(http.StripPrefix(staticPrefix,
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Set Cache-Control headers for static assets.
+			reqPath := r.URL.Path
+
+			// Service Worker: allow wider scope and don't cache the SW file itself.
+			if strings.HasSuffix(reqPath, "sw.js") {
+				w.Header().Set("Service-Worker-Allowed", "/")
+				w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+				assetHandler.ServeHTTP(w, r)
+				return
+			}
+
+			// Web manifest: don't cache (may change between deploys).
+			if strings.HasSuffix(reqPath, "site.webmanifest") {
+				w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+				assetHandler.ServeHTTP(w, r)
+				return
+			}
+
+			// Determine cache duration based on file extension.
+			ext := strings.ToLower(path.Ext(reqPath))
+			maxAge := "1y"
+			switch ext {
+			case ".html", ".htm":
+				maxAge = "0"
+				w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+			case ".js", ".css", ".png", ".jpg", ".jpeg", ".gif", ".svg",
+				".ico", ".woff", ".woff2", ".ttf", ".eot", ".webp":
+				w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+			default:
+				w.Header().Set("Cache-Control", "public, max-age=86400")
+			}
+			_ = maxAge
+
+			assetHandler.ServeHTTP(w, r)
+		}),
+	)))
 
 	// Listen on the appropriate socket.
 	if strings.HasPrefix(util.BindAddress, "unix://") {

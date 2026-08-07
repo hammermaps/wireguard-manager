@@ -8,6 +8,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Favicon -->
   <link rel="icon" href="{{.basePath}}/favicon">
+  <link rel="manifest" href="{{.basePath}}/static/custom/img/site.webmanifest" />
+  <meta name="apple-mobile-web-app-title" content="WireGuard Manager" />
   <!-- Font Awesome -->
   <link rel="stylesheet" href="{{.basePath}}/static/plugins/fontawesome-free/css/all.min.css">
   <!-- icheck bootstrap -->
@@ -141,6 +143,19 @@
         });
       });
     });
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('{{.basePath}}/static/custom/js/sw.js', {
+          scope: '{{.basePath}}/'
+        }).then(function(registration) {
+          console.log('ServiceWorker registered with scope:', registration.scope);
+        }).catch(function(err) {
+          console.warn('ServiceWorker registration failed:', err);
+        });
+      });
+    }
   </script>
 </body>
 </html>
